@@ -1,0 +1,1 @@
+This program uses backtracking to solve the layout of the first puzzle in Lyst. It is basically a rubiks cube of wires, if you're familiar with those kinds of games, and the board is 3x16. All that is currently known is the pieces on the board.

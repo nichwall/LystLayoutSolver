@@ -1,3 +1,5 @@
+// g++ -std=c++11 lystSolver.cpp
+
 #include <cstdio>
 #include <vector>
 #include <string>
@@ -41,6 +43,9 @@ int blockLen = blockHeight*blockWidth;
 
 int blockCount = (puzzleHeight/blockHeight) * (puzzleWidth/blockWidth);
 int maxLevel;
+
+// Thingy for me
+long itCount = 0;
 
 // Saving state
 void saveBlocks() {
@@ -117,8 +122,9 @@ int getPiece(std::string block, int index) {
 	int piece = (int)block[index]-96;
 	return piece;
 }
-int* getPieceCounts(std::string puzzle) {
-	int *count = new int[16];
+std::vector<int> getPieceCounts(std::string puzzle) {
+	//int *count = new int[16];
+	std::vector<int> count = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 	for (int i=0; i<puzzle.length(); i++) {
 		int temp = getPiece(puzzle,i);
 		count[temp]++;
@@ -127,6 +133,16 @@ int* getPieceCounts(std::string puzzle) {
 }
 int pieceCountIsValid(std::string puzzle) {
 	int count [16] = {0};
+	for (int i=0; i<puzzle.length(); i++) {
+		int temp = getPiece(puzzle,i);
+		count[temp]++;
+		if (count[temp] > numCounts[temp]) {
+			return 3;
+		}
+	}
+	return 0;
+}
+int pieceCountIsValid(std::string puzzle, std::vector<int> count) {
 	for (int i=0; i<puzzle.length(); i++) {
 		int temp = getPiece(puzzle,i);
 		count[temp]++;
@@ -170,6 +186,22 @@ int checkAddition(std::string in, int inWidth, std::string added, int addedWidth
 	
 	// Check piece counts
 	return pieceCountIsValid(in+added);
+}
+int checkAddition(std::string in, int inWidth, std::string added, int addedWidth, std::vector<int> previousCounts) {
+	for (int i=0; i<blockHeight; i++) {
+		int leftPiece = getPiece(in, (i+1)*inWidth-1);
+		int rightPiece = getPiece(added, i*addedWidth);
+		if (pieceHasRight(leftPiece) != pieceHasLeft(rightPiece)) {
+			return 1;
+		}
+		// Make sure that we don't have H/8 to the left of D/4
+		if (leftPiece==8 && rightPiece==4) {
+			return 2;
+		}
+	}
+	
+	// Check piece counts
+	return pieceCountIsValid(added,previousCounts);
 }
 
 // Recursively create every possible column
@@ -349,11 +381,19 @@ void solver(std::string in, int level) {
 	// Check if we're at a middle level, because those are the most common
 	if (level>0 && level+1<maxLevel) {
 		// Middle levels
+		
+		// Get counts of the base level so that we can save time later
+		std::vector<int> baseCounts = getPieceCounts(in);
+		
 		for (int i=0; i<midBlock.size(); i++) {
-			if (checkAddition(in, leftWidth+(level*midWidth), midBlock.at(i), midWidth) == 0) {
+			if (checkAddition(in, leftWidth+(level*midWidth), midBlock.at(i), midWidth, baseCounts) == 0) {
 				//std::cout << "Level... "<<level<<"  "<<i<<"/"<<midBlock.size()<<"\n";
 				if (level==1) {
-					std::cout << "Level... "<<level<<"  "<<i<<"/"<<midBlock.size()<<"\n";
+					std::cout << "Level... "<<level<<"  "<<i<<"/"<<midBlock.size()<<"\tLevel 2 valid count: "<<itCount<<"\n";
+					//std::cout << "Level... "<<level<<"  "<<i<<"/"<<midBlock.size()<<"\n";
+					itCount=0;
+				} else {
+					itCount++;
 				}
 				solver(in+midBlock.at(i) , level+1);
 			}
@@ -370,8 +410,12 @@ void solver(std::string in, int level) {
 		}
 	} else if (level<maxLevel){
 		// Final level
+		
+		// Get counts of the base level so that we can save time later
+		std::vector<int> baseCounts = getPieceCounts(in);
+		
 		for (int i=0; i<rightBlock.size(); i++) {
-			if (checkAddition(in, puzzleWidth-rightWidth, rightBlock.at(i), rightWidth) == 0) {
+			if (checkAddition(in, puzzleWidth-rightWidth, rightBlock.at(i), rightWidth, baseCounts) == 0) {
 				solver(in+rightBlock.at(i),level+1);
 			}
 		}

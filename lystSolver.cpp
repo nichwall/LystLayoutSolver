@@ -279,90 +279,73 @@ void generateVertical(std::string in) {
 	return;
 }
 
-// Combines left with mid, and then replaces left
-void combineLeft() {
-	std::vector<std::string> newLeft;
-	// Check that we need to combine the middle, not the right
-	if (leftWidth+rightWidth >= puzzleWidth) {
-		for (int i=0; i<leftBlock.size(); i++) {
-			printf("LeftBlock: %d/%d\n",i,leftBlock.size());
-			for (int j=0; j<rightBlock.size(); j++) {
-				// Check whether it's good
-				if (checkAddition(leftBlock.at(i), leftWidth, rightBlock.at(j), rightWidth) != 0) {
-					continue;
-				}
-				// Otherwise, add the combined blocks to "newLeft"
-				newLeft.push_back(leftBlock.at(i)+rightBlock.at(j));
-			}
-		}
-	} else {
-		for (int i=0; i<leftBlock.size(); i++) {
-			for (int j=0; j<midBlock.size(); j++) {
-				// Check whether it's good
-				if (checkAddition(leftBlock.at(i), leftWidth, midBlock.at(j), midWidth) != 0) {
-					continue;
-				}
-				// Otherwise, add the combined blocks to "newLeft"
-				newLeft.push_back(leftBlock.at(i)+midBlock.at(j));
-			}
-		}
+enum Combine { LEFT, MIDDLE, RIGHT };
+void combiner(Combine com) {
+	std::vector<std::string> leftIn;
+	int leftInWidth;
+	std::vector<std::string> rightIn;
+	int rightInWidth;
+	std::vector<std::string> output;
+	
+	// Figure out which one is used for left/right blocks
+	switch (com) {
+		case LEFT:
+			leftIn = leftBlock;
+			leftInWidth = leftWidth;
+			rightIn = midBlock;
+			rightInWidth = midWidth;
+			break;
+		case MIDDLE:
+			leftIn = midBlock;
+			leftInWidth = midWidth;
+			rightIn = midBlock;
+			rightInWidth = midWidth;
+			break;
+		case RIGHT:
+			leftIn = midBlock;
+			leftInWidth = midWidth;
+			rightIn = rightBlock;
+			rightInWidth = rightWidth;
+			break;
+		default:
+			break;
 	}
 	
-	
-	leftBlock.erase(leftBlock.begin(), leftBlock.end());
-	for (int i=0; i<newLeft.size(); i++) {
-		leftBlock.push_back(newLeft.at(i));
+	// Check that we're not getting bigger than the puzzle
+	if ( (leftWidth+rightWidth == puzzleWidth) && (com == LEFT) ) {
+		rightIn = rightBlock;
+		rightInWidth = rightWidth;
+	} else if ( leftWidth+rightWidth > puzzleWidth ) {
+		return;
 	}
-	printf("\nNew Left count: %d\n",newLeft.size());
 	
-	leftWidth += midWidth;
-	return;
-}
-void combineMid() {
-	std::vector<std::string> newMid;
-	for (int i=0; i<midBlock.size(); i++) {
-		for (int j=0; j<midBlock.size(); j++) {
-			// Check whether it's good
-			if (checkAddition(midBlock.at(i), midWidth, midBlock.at(j), midWidth) != 0) {
+	for (int i=0; i<leftIn.size(); i++) {
+		for (int j=0; j<rightIn.size(); j++) {
+			// Check whether it's good to combine these
+			if ( checkAddition( leftIn.at(i), leftInWidth, rightIn.at(j), rightInWidth) != 0 ) {
 				continue;
 			}
-			// Otherwise, add the combined blocks to "newLeft"
-			newMid.push_back(midBlock.at(i)+midBlock.at(j));
+			// Otherwise, add it back in
+			output.push_back(leftIn.at(i)+rightIn.at(j));
 		}
 	}
 	
-	
-	midBlock.erase(midBlock.begin(), midBlock.end());
-	for (int i=0; i<newMid.size(); i++) {
-		midBlock.push_back(newMid.at(i));
+	switch (com) {
+		case LEFT:
+			leftBlock = output;
+			leftWidth += rightInWidth;
+			break;
+		case MIDDLE:
+			midBlock = output;
+			midWidth += rightInWidth;
+			break;
+		case RIGHT:
+			rightBlock = output;
+			rightWidth += leftInWidth;
+			break;
+		default:
+			break;
 	}
-	printf("New Mid count: %d\n",newMid.size());
-	
-	midWidth += midWidth;
-	return;
-}
-void combineRight() {
-	std::vector<std::string> newRight;
-	for (int i=0; i<midBlock.size(); i++) {
-		for (int j=0; j<rightBlock.size(); j++) {
-			// Check whether it's good
-			if (checkAddition(midBlock.at(i), midWidth, rightBlock.at(j), rightWidth) != 0) {
-				continue;
-			}
-			// Otherwise, add the combined blocks to "newLeft"
-			newRight.push_back(midBlock.at(i)+rightBlock.at(j));
-		}
-	}
-	
-	
-	rightBlock.erase(rightBlock.begin(), rightBlock.end());
-	for (int i=0; i<newRight.size(); i++) {
-		rightBlock.push_back(newRight.at(i));
-	}
-	printf("New Right count: %d\n",newRight.size());
-	
-	rightWidth += midWidth;
-	return;
 }
 
 // Solve the puzzle!
@@ -432,12 +415,10 @@ int main() {
 		
 		for (int i=0; i<2; i++) {
 			printf("Running iteration %d...\n",i);
-			combineLeft();
-			combineRight();
-			combineMid();
+			combiner(LEFT);
+			combiner(RIGHT);
+			combiner(MIDDLE);
 		}
-		//combineLeft();
-		//combineRight();
 		
 		printf("sorting...\n");
 		std::sort(leftBlock.begin(), leftBlock.end());

@@ -3,7 +3,6 @@
 #include <cstdio>
 #include <vector>
 #include <string>
-#include <iostream>
 #include <math.h>
 #include <algorithm>    // std::sort
 #include <bitset>
@@ -286,7 +285,7 @@ void combineLeft() {
 	// Check that we need to combine the middle, not the right
 	if (leftWidth+rightWidth >= puzzleWidth) {
 		for (int i=0; i<leftBlock.size(); i++) {
-			std::cout << "LeftBlock: " << i << "/"<<leftBlock.size()<<"\n";
+			printf("LeftBlock: %d/%d\n",i,leftBlock.size());
 			for (int j=0; j<rightBlock.size(); j++) {
 				// Check whether it's good
 				if (checkAddition(leftBlock.at(i), leftWidth, rightBlock.at(j), rightWidth) != 0) {
@@ -369,7 +368,7 @@ void combineRight() {
 // Solve the puzzle!
 void solver(std::string in, int level) {
 	if (level >= maxLevel) {
-		std::cout << "Found a solution!  " << in << "\n";
+		printf("Found a solution  %s\n",in.c_str());
 		solutions.push_back(in);
 		// Write solutions to a file
 		if (outFile.is_open()) {
@@ -387,10 +386,8 @@ void solver(std::string in, int level) {
 		
 		for (int i=0; i<midBlock.size(); i++) {
 			if (checkAddition(in, leftWidth+(level*midWidth), midBlock.at(i), midWidth, baseCounts) == 0) {
-				//std::cout << "Level... "<<level<<"  "<<i<<"/"<<midBlock.size()<<"\n";
 				if (level==1) {
-					std::cout << "Level... "<<level<<"  "<<i<<"/"<<midBlock.size()<<"\tLevel 2 valid count: "<<itCount<<"\n";
-					//std::cout << "Level... "<<level<<"  "<<i<<"/"<<midBlock.size()<<"\n";
+					printf("Level... %d %d/%d \tLevel 2 valid count: %d\n",level,i,midBlock.size(),itCount);
 					itCount=0;
 				} else {
 					itCount++;
@@ -404,7 +401,7 @@ void solver(std::string in, int level) {
 			if ( i <= rootIt ) {
 				continue;
 			}
-			std::cout << "Root level... "<<i<<"/"<<leftBlock.size()<<"\tSolutions: "<<solutions.size()<<"\n";
+			printf("Root level... %d/%d\tSolutions: %d\n",i,leftBlock.size(),solutions.size());
 			solver(leftBlock.at(i), 1);
 			saveRootIt(i);
 		}
@@ -459,10 +456,10 @@ int main() {
 	printf("\nLeftBlock count: %d\n",leftBlock.size());
 	printf("RightBlock count: %d\n",rightBlock.size());
 	printf("MidBlock count: %d\n",midBlock.size());
-	std::cout << "L: "<<leftWidth<<"  M: "<<midWidth<<"  R: "<<rightWidth<<"\n";
+	printf("L: %d  M: %d  R: %d\n",leftWidth,midWidth,rightWidth);
 	
 	maxLevel = (puzzleWidth-leftWidth-rightWidth)/midWidth + 2;
-	std::cout << "Max Level: " << maxLevel << "\n";
+	printf("Max Level: %d\n",maxLevel);
 	solver("",0);
 	
 	// Close solutions file

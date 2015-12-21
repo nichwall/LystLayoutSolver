@@ -1,0 +1,6 @@
+src/lastIterationCount.txt
+src/*Blocks.txt
+src/solutions.txt
+
+*.o
+Solver

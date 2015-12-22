@@ -14,4 +14,4 @@ set (EXTRA_LIBS ${EXTRA_LIBS}
 add_executable (Lyst
         src/lystSolver.cpp
 )
-target_link_libraries (MandelExplorer ${EXTRA_LIBS})
+target_link_libraries (Lyst ${EXTRA_LIBS})

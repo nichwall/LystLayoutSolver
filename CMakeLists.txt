@@ -12,6 +12,8 @@ set (EXTRA_LIBS ${EXTRA_LIBS}
 )
 
 add_executable (Lyst
-        src/lystSolver.cpp
+    #        src/lystSolver.cpp
+    src/lyst.cpp
+    src/main.cpp
 )
 target_link_libraries (Lyst ${EXTRA_LIBS})

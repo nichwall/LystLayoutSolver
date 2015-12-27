@@ -241,6 +241,23 @@ void Puzzle::makeBlocks() {
         printf("Right Width: %d\t Number of Right Blocks: %d\n",rightWidth,rightBlocks.size());
     }
 
+    // Solve for the correct pieces
+    if (rightWidth + leftWidth == width) {
+        lastIndex = 0;
+        std::vector<std::thread> threadPool;
+        for (int i=0; i<max_threads; i++) {
+            threadPool.push_back(std::thread(&Puzzle::combineLeftBlocks, this));
+        }
+        for (int i=0; i<max_threads; i++) {
+            threadPool[i].join();
+        }
+        // Swap vectors
+        leftBlocks.swap(tempLeftBlocks);
+        tempLeftBlocks.clear();
+        
+        printf("Left Width: %d\t Number of Left Blocks: %d\n",leftWidth,leftBlocks.size());
+    }
+
     return;
 }
 

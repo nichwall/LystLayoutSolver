@@ -84,4 +84,6 @@ class Puzzle {
         int rightWidth;
         int desiredRightWidth;
 
+        // Temporary variable
+        int lastIndex;
 };

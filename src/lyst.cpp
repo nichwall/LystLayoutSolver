@@ -200,6 +200,7 @@ void Puzzle::makeBlocks() {
 
     printf("Max threads: %d\n",max_threads);
     while (leftWidth < desiredLeftWidth && leftWidth > 0) {
+        lastIndex = 0;
         // Create all of the left blocks first
         std::vector<std::thread> threadPool;
         for (int i=0; i<max_threads; i++) {
@@ -210,6 +211,7 @@ void Puzzle::makeBlocks() {
         }
         // Swap temp blocks with the vector of left
         leftBlocks.swap(tempLeftBlocks);
+        tempLeftBlocks.clear();
         if (leftBlocks.size() != 0) {
             leftWidth = leftBlocks[0].length()/height;
         }
@@ -220,6 +222,7 @@ void Puzzle::makeBlocks() {
     }
 
     while (rightWidth < desiredRightWidth && rightWidth > 0) {
+        lastIndex = 0;
         // Create all of the right blocks last
         std::vector<std::thread> threadPool;
         for (int i=0; i<max_threads; i++) {
@@ -230,6 +233,7 @@ void Puzzle::makeBlocks() {
         }
         // Swap temp blocks with the vector of right
         rightBlocks.swap(tempRightBlocks);
+        tempRightBlocks.clear();
         if (rightBlocks.size() != 0)
             rightWidth = rightBlocks[0].length()/height;
         else
@@ -246,12 +250,12 @@ void Puzzle::combineLeftBlocks() {
     while (true) {
         // Get the first item, then remove so that others don't use it
         mutex1.lock();
-        if (leftBlocks.size() == 0) {
+        if (leftBlocks.size() == 0 || leftBlocks.size() <= lastIndex) {
             mutex1.unlock();
             break;
         }
-        std::string currentLeft = leftBlocks[0];
-        leftBlocks.erase(leftBlocks.begin(), leftBlocks.begin()+1);
+        std::string currentLeft = leftBlocks[lastIndex];
+        lastIndex++;
         mutex1.unlock();
 
         // Check whether we need to loop through all of the middle pieces or the right pieces
@@ -290,12 +294,12 @@ void Puzzle::combineRightBlocks() {
     while (true) {
         // Get the first item, then remove so that others don't use it
         mutex1.lock();
-        if (rightBlocks.size() == 0) {
+        if (rightBlocks.size() == 0 || rightBlocks.size() <= lastIndex) {
             mutex1.unlock();
             break;
         }
-        std::string currentRight = rightBlocks[0];
-        rightBlocks.erase(rightBlocks.begin(), rightBlocks.begin()+1);
+        std::string currentRight = rightBlocks[lastIndex];
+        lastIndex++;
         mutex1.unlock();
 
         // Check whether we need to loop through all of the middle pieces or the right pieces

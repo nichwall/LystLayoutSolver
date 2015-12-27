@@ -2,5 +2,10 @@ src/lastIterationCount.txt
 src/*Blocks.txt
 src/solutions.txt
 
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+
 *.o
-Solver
+Lyst

@@ -36,7 +36,7 @@ int puzzleWidth = 16;
 //int puzzleWidth = 3;
 int numCounts [] = {1000,4,5,8,4,2,2,5,1,5,3,5,2,1,1,0};
 // Block info
-int blockWidth = 2;
+int blockWidth = 8;
 int blockHeight = 3;
 int blockLen = blockHeight*blockWidth;
 
@@ -418,7 +418,14 @@ int main() {
 			combiner(LEFT);
 			combiner(RIGHT);
 			combiner(MIDDLE);
+            printf("LeftBlock count: %d\n",leftBlock.size());
+            printf("RightBlock count: %d\n",rightBlock.size());
+            printf("MidBlock count: %d\n",midBlock.size());
 		}
+        combiner(LEFT);
+        printf("LeftBlock count, width 8: %d\n",leftBlock.size());
+        combiner(RIGHT);
+        printf("RightBlock count, width 8: %d\n",rightBlock.size());
 		
 		printf("sorting...\n");
 		std::sort(leftBlock.begin(), leftBlock.end());

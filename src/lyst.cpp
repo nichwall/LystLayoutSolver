@@ -236,7 +236,6 @@ void Puzzle::makeBlocks() {
         else
             rightWidth = 0;
         printf("Right Width: %d\t Number of Right Blocks: %d\n",rightWidth,rightBlocks.size());
-        std::cout << "Number of Right Blocks: " << rightBlocks.size() << "\n";
     }
 
     return;

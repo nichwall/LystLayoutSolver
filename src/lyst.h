@@ -22,6 +22,9 @@ class Puzzle {
         int getDesiredLeftWidth();
         int getDesiredMidWidth();
         int getDesiredRightWidth();
+        int getMaxThreads();
+
+        void setMaxThreads(int threadCount) { if (threadCount > 0) max_threads = threadCount; }
         
         std::vector<std::string> getLeftBlocks();
         std::vector<std::string> getMidBlocks();

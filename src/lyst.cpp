@@ -43,6 +43,7 @@ int Puzzle::getPuzzleWidth()       { return width;             }
 int Puzzle::getDesiredLeftWidth()  { return desiredLeftWidth;  }
 int Puzzle::getDesiredMidWidth()   { return desiredMidWidth;   }
 int Puzzle::getDesiredRightWidth() { return desiredRightWidth; }
+int Puzzle::getMaxThreads()        { return max_threads;       }
 
 std::vector<std::string> Puzzle::getLeftBlocks()  { return leftBlocks;  }
 std::vector<std::string> Puzzle::getMidBlocks()   { return midBlocks;   }
@@ -190,10 +191,8 @@ void Puzzle::generateFirstSet(std::string in) {
 
 // Generate all of the blocks of desired width
 void Puzzle::makeBlocks() {
-    printf("Making blocks....\n");
     // Generate all the beginning things
     generateFirstSet();
-    printf("Generated first set...\n");
     std::sort( leftBlocks.begin(),   leftBlocks.end()  );
     std::sort( midBlocks.begin(),    midBlocks.end()   );
     std::sort( rightBlocks.begin(),  rightBlocks.end() );

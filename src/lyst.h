@@ -20,8 +20,6 @@ class Puzzle {
         int getPuzzleHeight();
         int getPuzzleWidth();
         int getDesiredLeftWidth();
-        int getDesiredMidWidth();
-        int getDesiredRightWidth();
         int getMaxThreads();
 
         void setMaxThreads(int threadCount) { if (threadCount > 0) max_threads = threadCount; }
@@ -46,7 +44,6 @@ class Puzzle {
         void generateFirstSet(std::string in);
 
         void combineLeftBlocks();
-        void combineRightBlocks();
 
         // Helper functions in generating
         int getPiece(std::string block, int index);
@@ -75,15 +72,8 @@ class Puzzle {
         std::vector<std::string> midBlocks;
         std::vector<std::string> rightBlocks;
         std::vector<std::string> tempLeftBlocks;
-        std::vector<std::string> tempMidBlocks;
-        std::vector<std::string> tempRightBlocks;
         int leftWidth;
         int desiredLeftWidth;
         int midWidth;
-        int desiredMidWidth;
         int rightWidth;
-        int desiredRightWidth;
-
-        // Temporary variable
-        int lastIndex;
 };

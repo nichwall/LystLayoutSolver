@@ -4,7 +4,7 @@ Puzzle::Puzzle() {
     maxPieceCounts = {0,0,0,0,0,0,0,0};
     height = width = 0;
     leftWidth = rightWidth = midWidth = 1;
-    desiredLeftWidth = desiredMidWidth = desiredRightWidth = 0;
+    desiredLeftWidth = 0;
     max_threads = std::thread::hardware_concurrency();
 }
 Puzzle::Puzzle(std::vector<int> pieceCountData, int puzzleHeight, int puzzleWidth) {
@@ -12,8 +12,6 @@ Puzzle::Puzzle(std::vector<int> pieceCountData, int puzzleHeight, int puzzleWidt
     height = puzzleHeight;
     width = puzzleWidth;
     desiredLeftWidth  = 1;
-    desiredMidWidth   = 1;
-    desiredRightWidth = 1;
     leftWidth = rightWidth = midWidth = 1;
     max_threads = std::thread::hardware_concurrency();
 }
@@ -25,11 +23,6 @@ Puzzle::Puzzle(std::vector<int> pieceCountData, int puzzleHeight, int puzzleWidt
     // Check that we're not trying to be bigger than the puzzle
     if (desiredLeftWidth > width)
         desiredLeftWidth = width;
-    desiredRightWidth = desiredBlockWidth;
-    // Check that left + right is bigger than the puzzle
-    if (desiredLeftWidth + desiredRightWidth > width)
-        desiredRightWidth = width - desiredLeftWidth;
-    desiredMidWidth = 1;
     leftWidth = rightWidth = midWidth = 1;
     max_threads = std::thread::hardware_concurrency();
 }
@@ -41,8 +34,6 @@ Puzzle::~Puzzle() {
 int Puzzle::getPuzzleHeight()      { return height;            }
 int Puzzle::getPuzzleWidth()       { return width;             }
 int Puzzle::getDesiredLeftWidth()  { return desiredLeftWidth;  }
-int Puzzle::getDesiredMidWidth()   { return desiredMidWidth;   }
-int Puzzle::getDesiredRightWidth() { return desiredRightWidth; }
 int Puzzle::getMaxThreads()        { return max_threads;       }
 
 std::vector<std::string> Puzzle::getLeftBlocks()  { return leftBlocks;  }
@@ -193,15 +184,11 @@ void Puzzle::generateFirstSet(std::string in) {
 void Puzzle::makeBlocks() {
     // Generate all the beginning things
     generateFirstSet();
-    std::sort( leftBlocks.begin(),   leftBlocks.end()  );
-    std::sort( midBlocks.begin(),    midBlocks.end()   );
-    std::sort( rightBlocks.begin(),  rightBlocks.end() );
     printf("Block counts: %d\t%d\t%d\n",leftBlocks.size(),midBlocks.size(),rightBlocks.size());
 
     std::cout << "Size of vectors: " << leftBlocks.capacity()+midBlocks.capacity()+rightBlocks.capacity() << "\n";
     printf("Max threads: %d\n",max_threads);
     while (leftWidth < desiredLeftWidth && leftWidth > 0) {
-        lastIndex = 0;
         // Create all of the left blocks first
         std::vector<std::thread> threadPool;
         for (int i=0; i<max_threads; i++) {
@@ -222,29 +209,8 @@ void Puzzle::makeBlocks() {
         printf("Left Width: %d\t Number of Left Blocks: %d\n",leftWidth,leftBlocks.size());
     }
 
-    while (rightWidth < desiredRightWidth && rightWidth > 0) {
-        lastIndex = 0;
-        // Create all of the right blocks last
-        std::vector<std::thread> threadPool;
-        for (int i=0; i<max_threads; i++) {
-            threadPool.push_back(std::thread(&Puzzle::combineRightBlocks, this));
-        }
-        for (int i=0; i<max_threads; i++) {
-            threadPool[i].join();
-        }
-        // Swap temp blocks with the vector of right
-        rightBlocks.swap(tempRightBlocks);
-        tempRightBlocks.clear();
-        if (rightBlocks.size() != 0)
-            rightWidth = rightBlocks[0].length()/height;
-        else
-            rightWidth = 0;
-        printf("Right Width: %d\t Number of Right Blocks: %d\n",rightWidth,rightBlocks.size());
-    }
-
     // Solve for the correct pieces
     if (rightWidth + leftWidth == width) {
-        lastIndex = 0;
         std::vector<std::thread> threadPool;
         for (int i=0; i<max_threads; i++) {
             threadPool.push_back(std::thread(&Puzzle::combineLeftBlocks, this));
@@ -268,12 +234,12 @@ void Puzzle::combineLeftBlocks() {
     while (true) {
         // Get the first item, then remove so that others don't use it
         mutex1.lock();
-        if (leftBlocks.size() == 0 || leftBlocks.size() <= lastIndex) {
+        if (leftBlocks.size() == 0) {
             mutex1.unlock();
             break;
         }
-        std::string currentLeft = leftBlocks[lastIndex];
-        lastIndex++;
+        std::string currentLeft = leftBlocks.back();
+        leftBlocks.pop_back();
         mutex1.unlock();
 
         // Check whether we need to loop through all of the middle pieces or the right pieces
@@ -305,50 +271,6 @@ void Puzzle::combineLeftBlocks() {
     mutex1.lock();
     for (int i=0; i<newLeft.size(); i++) {
         tempLeftBlocks.push_back(newLeft[i]);
-    }
-    mutex1.unlock();
-}
-void Puzzle::combineRightBlocks() {
-    std::vector<std::string> newRight;
-    // We need to loop for as long as there's items left in the vector
-    while (true) {
-        // Get the first item, then remove so that others don't use it
-        mutex1.lock();
-        if (rightBlocks.size() == 0 || rightBlocks.size() <= lastIndex) {
-            mutex1.unlock();
-            break;
-        }
-        std::string currentRight = rightBlocks[lastIndex];
-        lastIndex++;
-        mutex1.unlock();
-
-        // Check whether we need to loop through all of the middle pieces or the right pieces
-        bool useLeft = false;
-        if (leftWidth + rightWidth == width) {
-            useLeft = true;
-        }
-
-        // If we're using the middle pieces
-        if (!useLeft) {
-            for (int i=0; i<midBlocks.size(); i++) {
-                // Check if we can add it
-                if ( !checkAddition( midBlocks[i], midWidth, currentRight, rightWidth) )
-                    continue;
-                newRight.push_back( midBlocks[i]+currentRight );
-            }
-        } else {
-            for (int i=0; i<leftBlocks.size(); i++) {
-                // Check if we can add it
-                if ( !checkAddition( leftBlocks[i], leftWidth, currentRight, rightWidth) )
-                    continue;
-                newRight.push_back( leftBlocks[i]+currentRight );
-            }
-        }
-    }
-    // Ran out of pieces, so add all of the newLeft to leftBlocks
-    mutex1.lock();
-    for (int i=0; i<newRight.size(); i++) {
-        tempRightBlocks.push_back(newRight[i]);
     }
     mutex1.unlock();
 }

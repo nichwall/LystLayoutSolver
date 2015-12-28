@@ -1,7 +1,7 @@
 #include "lyst.h"
 
 int main(int argc, char **argv) {
-    std::vector<int> pieces = {1000,4,5,8,4,2,2,5,1,5,3,5,2,1,1,0};
+    std::vector<int> pieces = {1000,1,4,2,5,2,2,1,4,4,2,1,4,4,2,1,9,6,5,0};
     int puzzleHeight = 3,
         puzzleWidth = 16,
         desiredWidth = 16;

@@ -198,6 +198,7 @@ void Puzzle::makeBlocks() {
     std::sort( rightBlocks.begin(),  rightBlocks.end() );
     printf("Block counts: %d\t%d\t%d\n",leftBlocks.size(),midBlocks.size(),rightBlocks.size());
 
+    std::cout << "Size of vectors: " << leftBlocks.capacity()+midBlocks.capacity()+rightBlocks.capacity() << "\n";
     printf("Max threads: %d\n",max_threads);
     while (leftWidth < desiredLeftWidth && leftWidth > 0) {
         lastIndex = 0;
@@ -288,6 +289,8 @@ void Puzzle::combineLeftBlocks() {
                 if ( !checkAddition( currentLeft, leftWidth, midBlocks[i], midWidth) )
                     continue;
                 newLeft.push_back( currentLeft+midBlocks[i] );
+//                if (leftWidth > 5)
+//                    std::cout << newLeft.capacity() << "\t" << newLeft.size() << "\n";
             }
         } else {
             for (int i=0; i<rightBlocks.size(); i++) {

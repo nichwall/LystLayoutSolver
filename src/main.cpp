@@ -19,18 +19,8 @@ int main(int argc, char **argv) {
     printf("Left: %d\tMid: %d\tRight: %d\n",a.getLeftBlocks().size(), a.getMidBlocks().size(), a.getRightBlocks().size());
 
     std::cout << "Desired Left: " << a.getDesiredLeftWidth() << "\n";
-    std::vector<std::string> left = a.getLeftBlocks();
-    for (int i=0; i<left.size(); i++) {
-        std::cout << left[i] << "\n";
-    }
-    /*
-    std::cout << "\n\n\n";
-    for (int i=0; i<mid.size(); i++) {
-        for (int j=0; j<mid[i].length(); j++) {
-            std::cout << (int)mid[i].at(j) << "\t";
-        }
-        std::cout << "\n";
-//        std::cout << mid[i] << "\n";
-    }
-*/    
+    std::vector< std::vector<uint16_t> > left = a.getLeftBlocks();
+//    for (int i=0; i<left.size(); i++) {
+//        std::cout << left[i] << "\n";
+//    }
 }

@@ -1,4 +1,4 @@
-LystLayoutSolver
+LystLayoutSolver [Travis-CI](https://travis-ci.org/nichwall/LystLayoutSolver.svg?branch=master)
 ================
 
 Program to solve the layout of the first Lyst puzzle.

@@ -3,38 +3,18 @@
 Puzzle::Puzzle() {
     maxPieceCounts = {0,0,0,0,0,0,0,0};
     height = width = 0;
-    leftWidth = rightWidth = midWidth = 1;
-    desiredLeftWidth = 0;
     max_threads = std::thread::hardware_concurrency();
 }
 Puzzle::Puzzle(std::vector<int> pieceCountData, int puzzleHeight, int puzzleWidth) {
     maxPieceCounts = pieceCountData;
     height = puzzleHeight;
     width = puzzleWidth;
-    desiredLeftWidth  = 1;
-    leftWidth = rightWidth = midWidth = 1;
-    max_threads = std::thread::hardware_concurrency();
-}
-Puzzle::Puzzle(std::vector<int> pieceCountData, int puzzleHeight, int puzzleWidth, int desiredBlockWidth) {
-    maxPieceCounts = pieceCountData;
-    height = puzzleHeight;
-    width = puzzleWidth;
-    desiredLeftWidth = desiredBlockWidth;
-    // Check that we're not trying to be bigger than the puzzle
-    if (desiredLeftWidth > width)
-        desiredLeftWidth = width;
-    leftWidth = rightWidth = midWidth = 1;
     max_threads = std::thread::hardware_concurrency();
 }
 
 Puzzle::~Puzzle() {
 
 }
-
-int Puzzle::getPuzzleHeight()      { return height;            }
-int Puzzle::getPuzzleWidth()       { return width;             }
-int Puzzle::getDesiredLeftWidth()  { return desiredLeftWidth;  }
-int Puzzle::getMaxThreads()        { return max_threads;       }
 
 /*std::vector<std::string> Puzzle::getLeftBlocks()  { return leftBlocks;  }
 std::vector<std::string> Puzzle::getMidBlocks()   { return midBlocks;   }
@@ -60,10 +40,6 @@ std::vector< std::vector<uint16_t> > Puzzle::getMidBlocks()   { return midBlocks
 std::vector<uint16_t> Puzzle::getLeftBlocks(int index)        { return leftBlocks[index];  }
 std::vector<uint16_t> Puzzle::getRightBlocks(int index)       { return rightBlocks[index]; }
 std::vector<uint16_t> Puzzle::getMidBlocks(int index)         { return midBlocks[index];   }
-
-int Puzzle::getLeftWidth()  { return leftWidth;  }
-int Puzzle::getMidWidth()   { return midWidth;   }
-int Puzzle::getRightWidth() { return rightWidth; }
 
 
 // Helper functions used for generating things
@@ -215,97 +191,87 @@ void Puzzle::makeBlocks() {
     generateFirstSet();
     printf("Block counts: %d\t%d\t%d\n",leftBlocks.size(),midBlocks.size(),rightBlocks.size());
 
-//    max_threads = 1;
     printf("Max threads: %d\n",max_threads);
-    while (leftWidth < desiredLeftWidth && leftWidth > 0) {
-        // Create all of the left blocks first
-        std::vector<std::thread> threadPool;
-        for (int i=0; i<max_threads; i++) {
-            threadPool.push_back(std::thread(&Puzzle::combineLeftBlocks, this));
-        }
-        for (int i=0; i<max_threads; i++) {
-            threadPool[i].join();
-        }
-        // Swap temp blocks with the vector of left
-        leftBlocks.swap(tempLeftBlocks);
-        tempLeftBlocks.clear();
-        if (leftBlocks.size() != 0) {
-            leftWidth = leftBlocks[0].size();
-        }
-        else {
-            leftWidth = 0;
-        }
-        printf("Left Width: %d\t Number of Left Blocks: %d\n",leftWidth,leftBlocks.size());
-    }
 
-    // Solve for the correct pieces
-    if (rightWidth + leftWidth == width) {
-        std::vector<std::thread> threadPool;
-        for (int i=0; i<max_threads; i++) {
-            threadPool.push_back(std::thread(&Puzzle::combineLeftBlocks, this));
-        }
-        for (int i=0; i<max_threads; i++) {
-            threadPool[i].join();
-        }
-        // Swap vectors
-        leftBlocks.swap(tempLeftBlocks);
-        tempLeftBlocks.clear();
-        
-        printf("Left Width: %d\t Number of Left Blocks: %d\n",leftWidth,leftBlocks.size());
+    // Start the threads
+    std::vector<std::thread> threadPool;
+    for (int i=0; i<max_threads; i++) {
+        threadPool.push_back(std::thread(&Puzzle::combineLeftBlocks, this));
+    }
+    for (int i=0; i<max_threads; i++) {
+        threadPool[i].join();
     }
 
     return;
 }
 
+unsigned long long totalRemoved = 0;
+
 void Puzzle::combineLeftBlocks() {
-    std::vector< std::vector<uint16_t> > newLeft;
     // We need to loop for as long as there's items left in the vector
     while (true) {
         // Get the first item, then remove so that others don't use it
-        mutex1.lock();
+        mutex_left.lock();
         if (leftBlocks.size() == 0) {
-            mutex1.unlock();
+            mutex_left.unlock();
             break;
         }
         std::vector<uint16_t> currentLeft = leftBlocks.back();
         leftBlocks.pop_back();
-        mutex1.unlock();
+        totalRemoved++;
+        mutex_left.unlock();
 
         // Check whether we need to loop through all of the middle pieces or the right pieces
+        // or if we're done
         bool useRight = false;
-        if (leftWidth + rightWidth == width) {
+        if ( currentLeft.size() == width - 1 ) {
             useRight = true;
+            printf("Using right, size of vector: %d\n",leftBlocks.size());
+        } else if ( currentLeft.size() == width ) {
+            mutex_valid.lock();
+            validSolutions.push_back(currentLeft);
+            mutex_valid.unlock();
+            continue;
+        }
+
+        if (currentLeft.size() < 5) {
+            printf("Current left size: %d\tvector size: %d\ttotal removed: ",currentLeft.size(),leftBlocks.size());
+            std::cout << totalRemoved << "\n";
+/*            for (int i=0; i<currentLeft.size(); i++) {
+                std::cout << "\t" << currentLeft[i];
+            }
+            printf("\n");*/
         }
 
         // If we're using the middle pieces
         if (!useRight) {
             for (int i=0; i<midBlocks.size(); i++) {
                 // Check if we can add it
-                if ( !checkAddition( currentLeft, leftWidth, midBlocks[i], midWidth) )
+                if ( !checkAddition( currentLeft, currentLeft.size(), midBlocks[i], midBlocks[i].size()) )
                     continue;
                 std::vector<uint16_t> temp = currentLeft;
+                //printf("Temp size: %d\tmidBlocks size: %d\n",temp.size(),midBlocks[i].size());
                 for (int j=0; j<midBlocks[i].size(); j++) {
                     temp.push_back(midBlocks[i][j]);
                 }
-                newLeft.push_back( temp );
+                mutex_left.lock();
+                leftBlocks.push_back( temp );
+                //printf("Found something, new size %d\tleftBlocks: %d\n",temp.size(),leftBlocks.size());
+                mutex_left.unlock();
             }
         } else {
             for (int i=0; i<rightBlocks.size(); i++) {
                 // Check if we can add it
-                if ( !checkAddition( currentLeft, leftWidth, rightBlocks[i], rightWidth) )
+                if ( !checkAddition( currentLeft, currentLeft.size(), rightBlocks[i], rightBlocks[i].size()) )
                     continue;
                 std::vector<uint16_t> temp = currentLeft;
                 for (int j=0; j<rightBlocks[i].size(); j++) {
                     temp.push_back(rightBlocks[i][j]);
                 }
-                newLeft.push_back( temp );
+                mutex_left.lock();
+                leftBlocks.push_back( temp );
+                mutex_left.unlock();
             }
         }
     }
-    // Ran out of pieces, so add all of the newLeft to leftBlocks
-    mutex1.lock();
-    for (int i=0; i<newLeft.size(); i++) {
-        tempLeftBlocks.push_back(newLeft[i]);
-    }
-    mutex1.unlock();
 }

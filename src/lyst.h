@@ -13,16 +13,14 @@ class Puzzle {
         // Constructors
         Puzzle();
         Puzzle(std::vector<int> pieceCountData, int puzzleHeight, int puzzleWidth);
-        Puzzle(std::vector<int> pieceCountData, int puzzleHeight, int puzzleWidth, int desiredBlockWidth);
 
         // Destructors
         ~Puzzle();
 
         // Accessors
-        int getPuzzleHeight();
-        int getPuzzleWidth();
-        int getDesiredLeftWidth();
-        int getMaxThreads();
+        int getPuzzleHeight() { return height;      }
+        int getPuzzleWidth()  { return width;       }
+        int getMaxThreads()   { return max_threads; }
 
         void setMaxThreads(int threadCount) { if (threadCount > 0) max_threads = threadCount; }
         
@@ -38,10 +36,6 @@ class Puzzle {
         std::vector<uint16_t> getLeftBlocks(int index);
         std::vector<uint16_t> getRightBlocks(int index);
         std::vector<uint16_t> getMidBlocks(int index);
-
-        int getLeftWidth();
-        int getMidWidth();
-        int getRightWidth();
 
         // Block creations
         void makeBlocks();
@@ -74,15 +68,13 @@ class Puzzle {
             width;
         std::vector<int> maxPieceCounts;
         unsigned int max_threads;
-        std::mutex mutex1;
+        std::mutex mutex_left;
+        std::mutex mutex_valid;
 
         // Vectors of blocks
         std::vector< std::vector<uint16_t> > leftBlocks;
         std::vector< std::vector<uint16_t> > midBlocks;
         std::vector< std::vector<uint16_t> > rightBlocks;
-        std::vector< std::vector<uint16_t> > tempLeftBlocks;
-        int leftWidth;
-        int desiredLeftWidth;
-        int midWidth;
-        int rightWidth;
+
+        std::vector< std::vector<uint16_t> > validSolutions;
 };

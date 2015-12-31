@@ -1,0 +1,11 @@
+language: cpp
+sudo: false
+
+compiler:
+    - gcc
+
+script: ./CIbuild.sh
+
+branches:
+    only:
+        - master

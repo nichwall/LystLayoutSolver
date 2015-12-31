@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
     
     printf("Left: %d\tMid: %d\tRight: %d\n",a.getLeftBlocks().size(), a.getMidBlocks().size(), a.getRightBlocks().size());
 
-    std::vector< std::vector<uint16_t> > left = a.getLeftBlocks();
+//    std::vector< std::vector<uint16_t> > left = a.getLeftBlocks();
 //    for (int i=0; i<left.size(); i++) {
 //        std::cout << left[i] << "\n";
 //    }

@@ -5,7 +5,7 @@ project (Lyst CXX)
 set (Lyst_VERSION_MAJOR 0)
 set (Lyst_VERSION_MINOR 1)
 #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -O3")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -O3")
 
 # Adding extra libraries for displays and things
 set (EXTRA_LIBS ${EXTRA_LIBS} 

@@ -16,7 +16,7 @@ Puzzle::~Puzzle() {
 
 }
 
-/*std::vector<std::string> Puzzle::getLeftBlocks()  { return leftBlocks;  }
+std::vector<std::string> Puzzle::getLeftBlocks()  { return leftBlocks;  }
 std::vector<std::string> Puzzle::getMidBlocks()   { return midBlocks;   }
 std::vector<std::string> Puzzle::getRightBlocks() { return rightBlocks; }
 std::string Puzzle::getLeftBlocks(int index) {
@@ -33,14 +33,15 @@ std::string Puzzle::getRightBlocks(int index) {
     if (index > 0 && index < rightBlocks.size())
         return rightBlocks[index];
     return 0;
-}*/
+}
+/*
 std::vector< std::vector<uint16_t> > Puzzle::getLeftBlocks()  { return leftBlocks;   }
 std::vector< std::vector<uint16_t> > Puzzle::getRightBlocks() { return rightBlocks;  }
 std::vector< std::vector<uint16_t> > Puzzle::getMidBlocks()   { return midBlocks;    }
 std::vector<uint16_t> Puzzle::getLeftBlocks(int index)        { return leftBlocks[index];  }
 std::vector<uint16_t> Puzzle::getRightBlocks(int index)       { return rightBlocks[index]; }
 std::vector<uint16_t> Puzzle::getMidBlocks(int index)         { return midBlocks[index];   }
-
+*/
 
 // Helper functions used for generating things
 int Puzzle::getPiece(std::vector<uint16_t> block, int index) {
@@ -78,6 +79,19 @@ bool Puzzle::pieceCountIsValid(std::vector<uint16_t> puzzle, std::vector<int> co
     }
     return true;
 }
+bool Puzzle::pieceCountIsValid(std::string puzzle) {
+    std::vector<int> count (height*width, 0);
+    return pieceCountIsValid(puzzle, count);
+}
+bool Puzzle::pieceCountIsValid(std::string puzzle, std::vector<int> count) {
+    for (int i=0; i<puzzle.length()*height; i++) {
+        int temp = getPiece(puzzle,i);
+        count[temp]++;
+        if (count[temp] > maxPieceCounts[temp])
+            return false;
+    }
+    return true;
+}
 bool Puzzle::checkAddition(std::vector<uint16_t> in, int inWidth, std::vector<uint16_t> added, int addedWidth) {
     for (int i=0; i<height; i++) {
         int leftPiece = getPiece(in, (i+1)*inWidth-1);
@@ -94,6 +108,28 @@ bool Puzzle::checkAddition(std::vector<uint16_t> in, int inWidth, std::vector<ui
     return pieceCountIsValid(in);
 }
 bool Puzzle::checkAddition(std::vector<uint16_t> in, int inWidth, std::vector<uint16_t> added, int addedWidth, std::vector<int> previousCounts) {
+    for (int i=0; i<height; i++) {
+        int leftPiece = getPiece(in, (i+1)*inWidth-1);
+        int rightPiece = getPiece(added, i*addedWidth);
+        if (pieceHasRight(leftPiece) != pieceHasLeft(rightPiece))
+            return false;
+        if (leftPiece == 8 && rightPiece == 4)
+            return false;
+    }
+    return pieceCountIsValid(added,previousCounts);
+}
+bool Puzzle::checkAddition(std::string in, int inWidth, std::string added, int addedWidth) {
+    for (int i=0; i<height; i++) {
+        int leftPiece = getPiece(in, (i+1)*inWidth-1);
+        int rightPiece = getPiece(added, i*addedWidth);
+        if (pieceHasRight(leftPiece) != pieceHasLeft(rightPiece))
+            return false;
+        if (leftPiece == 8 && rightPiece == 4)
+            return false;
+    }
+    return pieceCountIsValid(in+added);
+}
+bool Puzzle::checkAddition(std::string in, int inWidth, std::string added, int addedWidth, std::vector<int> previousCounts) {
     for (int i=0; i<height; i++) {
         int leftPiece = getPiece(in, (i+1)*inWidth-1);
         int rightPiece = getPiece(added, i*addedWidth);
@@ -139,16 +175,19 @@ void Puzzle::generateFirstSet(std::string in) {
 
         // Is a right block?
         if (!r && l) {
-            rightBlocks.push_back(newBlockVector);
+            //rightBlocks.push_back(newBlockVector);
+            rightBlocks.push_back(in);
             return;
         }
         // Left block?
         if (r && !l) {
-            leftBlocks.push_back(newBlockVector);
+            //leftBlocks.push_back(newBlockVector);
+            leftBlocks.push_back(in);
             return;
         }
         // Otherwise, it's a mid block
-        midBlocks.push_back(newBlockVector);
+        //midBlocks.push_back(newBlockVector);
+        midBlocks.push_back(in);
         return;
     }
 
@@ -187,8 +226,12 @@ void Puzzle::generateFirstSet(std::string in) {
 
 // Generate all of the blocks of desired width
 void Puzzle::makeBlocks() {
-    // Generate all the beginning things
-    generateFirstSet();
+    // Try to load blocks from a previous run
+    loadBlocks();
+    // If nothing was loaded, then we need to generate the initial pieces
+    if (midBlocks.size() == 0 || rightBlocks.size() == 0)
+        generateFirstSet();
+
     printf("Block counts: %d\t%d\t%d\n",leftBlocks.size(),midBlocks.size(),rightBlocks.size());
 
     printf("Max threads: %d\n",max_threads);
@@ -216,10 +259,18 @@ void Puzzle::combineLeftBlocks() {
             mutex_left.unlock();
             break;
         }
-        std::vector<uint16_t> currentLeft = leftBlocks.back();
+        //std::vector<uint16_t> currentLeft = leftBlocks.back();
+        std::string currentLeft = leftBlocks.back();
         leftBlocks.pop_back();
         totalRemoved++;
+        // If total removed elements is less than the thread count after mod, save the blocks
+        if (totalRemoved % 30000 == 0) {
+            mutex_savingBlocks.lock();
+            saveBlocks();
+            mutex_savingBlocks.unlock();
+        }
         mutex_left.unlock();
+
 
         // Check whether we need to loop through all of the middle pieces or the right pieces
         // or if we're done
@@ -228,6 +279,7 @@ void Puzzle::combineLeftBlocks() {
             useRight = true;
             printf("Using right, size of vector: %d\n",leftBlocks.size());
         } else if ( currentLeft.size() == width ) {
+        // If total removed elements is less than the thread count after mod, save the blocks
             mutex_valid.lock();
             validSolutions.push_back(currentLeft);
             mutex_valid.unlock();
@@ -249,13 +301,16 @@ void Puzzle::combineLeftBlocks() {
                 // Check if we can add it
                 if ( !checkAddition( currentLeft, currentLeft.size(), midBlocks[i], midBlocks[i].size()) )
                     continue;
-                std::vector<uint16_t> temp = currentLeft;
+                //std::vector<uint16_t> temp = currentLeft;
                 //printf("Temp size: %d\tmidBlocks size: %d\n",temp.size(),midBlocks[i].size());
-                for (int j=0; j<midBlocks[i].size(); j++) {
-                    temp.push_back(midBlocks[i][j]);
-                }
+                //for (int j=0; j<midBlocks[i].size(); j++) {
+                //    temp.push_back(midBlocks[i][j]);
+                //}
                 mutex_left.lock();
-                leftBlocks.push_back( temp );
+                //leftBlocks.push_back( temp );
+                mutex_savingBlocks.lock_shared();
+                leftBlocks.push_back( currentLeft+midBlocks[i] );
+                mutex_savingBlocks.unlock_shared();
                 //printf("Found something, new size %d\tleftBlocks: %d\n",temp.size(),leftBlocks.size());
                 mutex_left.unlock();
             }
@@ -264,14 +319,90 @@ void Puzzle::combineLeftBlocks() {
                 // Check if we can add it
                 if ( !checkAddition( currentLeft, currentLeft.size(), rightBlocks[i], rightBlocks[i].size()) )
                     continue;
-                std::vector<uint16_t> temp = currentLeft;
-                for (int j=0; j<rightBlocks[i].size(); j++) {
-                    temp.push_back(rightBlocks[i][j]);
-                }
+                //std::vector<uint16_t> temp = currentLeft;
+                //for (int j=0; j<rightBlocks[i].size(); j++) {
+                //    temp.push_back(rightBlocks[i][j]);
+                //}
                 mutex_left.lock();
-                leftBlocks.push_back( temp );
+                //leftBlocks.push_back( temp );
+                mutex_savingBlocks.lock_shared();
+                leftBlocks.push_back( currentLeft+rightBlocks[i] );
+                mutex_savingBlocks.unlock_shared();
                 mutex_left.unlock();
             }
         }
+    }
+}
+
+// Block saving functions
+void Puzzle::saveBlocks() {
+    // Write left blocks
+    std::ofstream leftBlockFile (leftBlockFileName.c_str());
+    if (leftBlockFile.good()) {
+        for (int i=0; i<leftBlocks.size(); i++) {
+            leftBlockFile << leftBlocks[i] << "\n";
+        }
+        leftBlockFile.close();
+    }
+    // Write mid blocks
+    std::ofstream midBlockFile (midBlockFileName.c_str());
+    if (midBlockFile.good()) {
+        for (int i=0; i<midBlocks.size(); i++) {
+            midBlockFile << midBlocks[i] << "\n";
+        }
+        midBlockFile.close();
+    }
+    // Write right blocks
+    std::ofstream rightBlockFile (rightBlockFileName.c_str());
+    if (rightBlockFile.good()) {
+        for (int i=0; i<rightBlocks.size(); i++) {
+            rightBlockFile << rightBlocks.size() << "\n";
+        }
+        rightBlockFile.close();
+    }
+    // Write blocks that are already long enough
+    std::ofstream validFile (validFileName.c_str());
+    if (validFile.good()) {
+        for (int i=0; i<validSolutions.size(); i++) {
+            validFile << validSolutions[i] << "\n";
+        }
+        validFile.close();
+    }
+}
+// Block loading functions
+void Puzzle::loadBlocks() {
+    std::string line;
+    // Warning: will replace old vectors if there is a save file
+    std::ifstream leftBlockFile (leftBlockFileName.c_str());
+    if (leftBlockFile.good()) {
+        leftBlocks.clear();
+        while ( getline(leftBlockFile, line) ) {
+            leftBlocks.push_back(line);
+        }
+        leftBlockFile.close();
+    }
+    std::ifstream midBlockFile (midBlockFileName.c_str());
+    if (midBlockFile.good()) {
+        midBlocks.clear();
+        while ( getline(midBlockFile, line) ) {
+            midBlocks.push_back(line);
+        }
+        midBlockFile.close();
+    }
+    std::ifstream rightBlockFile (rightBlockFileName.c_str());
+    if (rightBlockFile.good()) {
+        rightBlocks.clear();
+        while ( getline(rightBlockFile, line) ) {
+            rightBlocks.push_back(line);
+        }
+        rightBlockFile.close();
+    }
+    std::ifstream validFile (validFileName.c_str());
+    if (validFile.good()) {
+        validSolutions.clear();
+        while ( getline(validFile, line) ) {
+            validSolutions.push_back(line);
+        }
+        validFile.close();
     }
 }

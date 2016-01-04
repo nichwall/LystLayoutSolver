@@ -162,7 +162,7 @@ void Puzzle::generateFirstSet(std::string in) {
         std::string toAdd = in;
 #else
         std::vector<uint16_t> toAdd = { stou(in) };
-#endif
+#endif // ifdef USE_STRING_BLOCK
 
         // Is a right block?
         if (!r && l) {
@@ -227,14 +227,31 @@ void Puzzle::makeBlocks() {
 
     printf("Max threads: %d\n",max_threads);
 
-    // Start the threads
-    std::vector<std::thread> threadPool;
-    for (int i=0; i<max_threads; i++) {
-        threadPool.push_back(std::thread(&Puzzle::combineLeftBlocks, this));
+#ifdef BREADTH_SERACH
+    while (leftBlocks().size() != 0 && leftWidth != width) {
+#endif
+        // Start the threads
+        std::vector<std::thread> threadPool;
+        for (int i=0; i<max_threads; i++) {
+            threadPool.push_back(std::thread(&Puzzle::combineLeftBlocks, this));
+        }
+        for (int i=0; i<max_threads; i++) {
+            threadPool[i].join();
+        }
+#ifdef BREADTH_SEARCH
+        leftBlocks.swap(tempLeft);
+        tempLeft.clear();
+        if (leftBlocks.size() != 0) {
+#ifdef USE_STRING_BLOCK
+            leftWidth = leftBlocks[0].length()/height;
+#else
+            leftWidth = leftBlocks[0].size();
+#endif
+        } else {
+            leftWidth = 0;
+        }
     }
-    for (int i=0; i<max_threads; i++) {
-        threadPool[i].join();
-    }
+#endif
 
     return;
 }
@@ -305,13 +322,21 @@ void Puzzle::combineLeftBlocks() {
                 mutex_savingBlocks.lock_shared();
 #endif
 #ifdef USE_STRING_BLOCK
+#ifdef BREADTH_SEARCH
+                tempLeft.push_back( currentLeft+midBlocks[i] );
+#else
                 leftBlocks.push_back( currentLeft+midBlocks[i] );
+#endif
 #else
                 std::vector<uint16_t> temp = currentLeft;
                 for (int j=0; j<midBlocks[i].size(); j++) {
                     temp.push_back(midBlocks[i][j]);
                 }
+#ifdef BREADTH_SEARCH
+                tempLeft.push_back( temp );
+#else
                 leftBlocks.push_back( temp );
+#endif
 #endif
 #ifdef STORE_COMP
                 mutex_savingBlocks.unlock_shared();
@@ -333,13 +358,21 @@ void Puzzle::combineLeftBlocks() {
                 mutex_savingBlocks.lock_shared();
 #endif
 #ifdef USE_STRING_BLOCK
-                leftBlocks.push_back( currentLeft+rightBlocks[i] );
+#ifdef BREADTH_SEARCH
+                tempLeft.push_back( currentLeft+midBlocks[i] );
+#else
+                leftBlocks.push_back( currentLeft+midBlocks[i] );
+#endif
 #else
                 std::vector<uint16_t> temp = currentLeft;
                 for (int j=0; j<rightBlocks[i].size(); j++) {
                     temp.push_back(rightBlocks[i][j]);
                 }
+#ifdef BREADTH_SEARCH
+                tempLeft.push_back( temp );
+#else
                 leftBlocks.push_back( temp );
+#endif
 #endif
 #ifdef STORE_COMP
                 mutex_savingBlocks.unlock_shared();

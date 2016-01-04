@@ -81,10 +81,10 @@ class Puzzle {
         uint16_t stou (std::string block);
 #endif
 
-        bool pieceHasTop(int piece)    { return ( (piece & 0x1) != 0 ); }
-        bool pieceHasBottom(int piece) { return ( (piece & 0x2) != 0 ); }
-        bool pieceHasLeft(int piece)   { return ( (piece & 0x4) != 0 ); }
-        bool pieceHasRight(int piece)  { return ( (piece & 0x8) != 0 ); }
+        inline bool pieceHasTop(int piece)    { return ( (piece & 0x1) != 0 ); }
+        inline bool pieceHasBottom(int piece) { return ( (piece & 0x2) != 0 ); }
+        inline bool pieceHasLeft(int piece)   { return ( (piece & 0x4) != 0 ); }
+        inline bool pieceHasRight(int piece)  { return ( (piece & 0x8) != 0 ); }
 
 
         // Puzzle data
@@ -105,12 +105,20 @@ class Puzzle {
         std::vector< std::string > rightBlocks;
 
         std::vector< std::string > validSolutions;
+#ifdef BREADTH_SEARCH
+        std::vector< std::string > tempLeft;
+        int leftWidth;
+#endif
 #else
         std::vector< std::vector<uint16_t> > leftBlocks;
         std::vector< std::vector<uint16_t> > midBlocks;
         std::vector< std::vector<uint16_t> > rightBlocks;
 
         std::vector< std::vector<uint16_t> > validSolutions;
+#ifdef BREADTH_SEARCH
+        std::vector< std::vector<uint16_t> > tempLeft;
+        int leftWidth;
+#endif
 #endif
 
         // Storing data to files

@@ -58,6 +58,10 @@ class Puzzle {
         // Block creations
         void makeBlocks();
 
+#ifdef USE_STRING_BLOCK
+        void saveBlocks();
+        void loadBlocks();
+#endif
     private:
         // Functions related to block generation
         void generateFirstSet();
@@ -131,10 +135,6 @@ class Puzzle {
         std::string rightBlockFileName;
         std::string validFileName;
 
-#ifdef USE_STRING_BLOCK
-        void saveBlocks();
-        void loadBlocks();
-#endif
 };
 
 #endif

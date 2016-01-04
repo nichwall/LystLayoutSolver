@@ -15,8 +15,18 @@ int main(int argc, char **argv) {
     
     printf("Left: %d\tMid: %d\tRight: %d\n",a.getLeftBlocks().size(), a.getMidBlocks().size(), a.getRightBlocks().size());
 
+#ifdef USE_STRING_BLOCK
+    std::vector<std::string> valid = a.getValidBlocks();
+    printf("Found %d valid solutions.\n",valid.size());
+    for (int i=0; i<valid.size(); i++) {
+        std::cout << valid[i] << "\n";
+    }
+    return 0;
+#else
 //    std::vector< std::vector<uint16_t> > left = a.getLeftBlocks();
 //    for (int i=0; i<left.size(); i++) {
 //        std::cout << left[i] << "\n";
 //    }
+    return 0;
+#endif
 }

@@ -36,19 +36,23 @@ class Puzzle {
         void setMaxThreads(int threadCount) { if (threadCount > 0) max_threads = threadCount; }
         
 #ifdef USE_STRING_BLOCK
-        std::vector<std::string> getLeftBlocks()  { return leftBlocks;  }
-        std::vector<std::string> getMidBlocks()   { return midBlocks;   }
-        std::vector<std::string> getRightBlocks() { return rightBlocks; }
-        std::string getLeftBlocks(int index)      { return leftBlocks[index];  }
-        std::string getMidBlocks(int index)       { return midBlocks[index];   }
-        std::string getRightBlocks(int index)     { return rightBlocks[index]; }
+        std::vector<std::string> getLeftBlocks()  { return leftBlocks;     }
+        std::vector<std::string> getMidBlocks()   { return midBlocks;      }
+        std::vector<std::string> getRightBlocks() { return rightBlocks;    }
+        std::vector<std::string> getValidBlocks() { return validSolutions; }
+        std::string getLeftBlocks(int index)      { return leftBlocks[index];     }
+        std::string getMidBlocks(int index)       { return midBlocks[index];      }
+        std::string getRightBlocks(int index)     { return rightBlocks[index];    }
+        std::string getValidBlocks(int index)     { return validSolutions[index]; }
 #else
-        std::vector< std::vector<uint16_t> > getLeftBlocks()  { return leftBlocks;  }
-        std::vector< std::vector<uint16_t> > getMidBlocks()   { return midBlocks;   }
-        std::vector< std::vector<uint16_t> > getRightBlocks() { return rightBlocks; }
-        std::vector<uint16_t> getLeftBlocks(int index)        { return leftBlocks[index];  }
-        std::vector<uint16_t> getMidBlocks(int index)         { return midBlocks[index];   }
-        std::vector<uint16_t> getRightBlocks(int index)       { return rightBlocks[index]; }
+        std::vector< std::vector<uint16_t> > getLeftBlocks()  { return leftBlocks;     }
+        std::vector< std::vector<uint16_t> > getMidBlocks()   { return midBlocks;      }
+        std::vector< std::vector<uint16_t> > getRightBlocks() { return rightBlocks;    }
+        std::vector< std::vector<uint16_t> > getValidBlocks() { return validSolutions; }
+        std::vector<uint16_t> getLeftBlocks(int index)        { return leftBlocks[index];     }
+        std::vector<uint16_t> getMidBlocks(int index)         { return midBlocks[index];      }
+        std::vector<uint16_t> getRightBlocks(int index)       { return rightBlocks[index];    }
+        std::vector<uint16_t> getValidBlocks(int index)       { return validSolutions[index]; }
 #endif
 
         // Block creations

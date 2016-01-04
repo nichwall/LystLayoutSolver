@@ -220,7 +220,7 @@ void Puzzle::makeBlocks() {
     loadBlocks();
     // If nothing was loaded, then we need to generate the initial pieces
     if (midBlocks.size() == 0 || rightBlocks.size() == 0)
-#endif
+#endif // ifdef USE_STRING_BLOCK
         generateFirstSet();
 
     printf("Block counts: %d\t%d\t%d\n",leftBlocks.size(),midBlocks.size(),rightBlocks.size());
@@ -292,18 +292,12 @@ void Puzzle::combineLeftBlocks() {
         bool useRight = false;
         if ( currentLeft.size() == width - 1 ) {
             useRight = true;
-            printf("Using right, size of vector: %d\n",leftBlocks.size());
         } else if ( currentLeft.size() == width ) {
         // If total removed elements is less than the thread count after mod, save the blocks
             mutex_valid.lock();
             validSolutions.push_back(currentLeft);
             mutex_valid.unlock();
             continue;
-        }
-
-        if (currentLeft.size() < 5) {
-            printf("Current left size: %d\tvector size: %d\ttotal removed: ",currentLeft.size(),leftBlocks.size());
-            std::cout << totalRemoved << "\n";
         }
 
         // If we're using the middle pieces

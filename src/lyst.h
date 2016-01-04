@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <math.h>
 
+#include "lystConfig.h"
+
 class Puzzle {
     public:
         // Constructors
@@ -26,18 +28,21 @@ class Puzzle {
 
         void setMaxThreads(int threadCount) { if (threadCount > 0) max_threads = threadCount; }
         
-        std::vector<std::string> getLeftBlocks();
-        std::vector<std::string> getMidBlocks();
-        std::vector<std::string> getRightBlocks();
-        std::string getLeftBlocks(int index);
-        std::string getMidBlocks(int index);
-        std::string getRightBlocks(int index);
-        /*std::vector< std::vector<uint16_t> > getLeftBlocks();
-        std::vector< std::vector<uint16_t> > getRightBlocks();
-        std::vector< std::vector<uint16_t> > getMidBlocks();
-        std::vector<uint16_t> getLeftBlocks(int index);
-        std::vector<uint16_t> getRightBlocks(int index);
-        std::vector<uint16_t> getMidBlocks(int index);*/
+#ifdef USE_STRING_BLOCK
+        std::vector<std::string> getLeftBlocks()  { return leftBlocks;  }
+        std::vector<std::string> getMidBlocks()   { return midBlocks;   }
+        std::vector<std::string> getRightBlocks() { return rightBlocks; }
+        std::string getLeftBlocks(int index)      { return leftBlocks[index];  }
+        std::string getMidBlocks(int index)       { return midBlocks[index];   }
+        std::string getRightBlocks(int index)     { return rightBlocks[index]; }
+#else
+        std::vector< std::vector<uint16_t> > getLeftBlocks()  { return leftBlocks;  }
+        std::vector< std::vector<uint16_t> > getMidBlocks()   { return midBlocks;   }
+        std::vector< std::vector<uint16_t> > getRightBlocks() { return rightBlocks; }
+        std::vector<uint16_t> getLeftBlocks(int index)        { return leftBlocks[index];  }
+        std::vector<uint16_t> getMidBlocks(int index)         { return midBlocks[index];   }
+        std::vector<uint16_t> getRightBlocks(int index)       { return rightBlocks[index]; }
+#endif
 
         // Block creations
         void makeBlocks();
@@ -50,23 +55,29 @@ class Puzzle {
         void combineLeftBlocks();
 
         // Helper functions in generating
-        int getPiece(std::vector<uint16_t> block, int index);
         int getPiece(std::string block, int index);
-        std::vector<int> getPieceCounts(std::vector<uint16_t> puzzle);
+        std::vector<int> getPieceCounts(std::string puzzle);
         bool pieceCountIsValid(std::string puzzle);
         bool pieceCountIsValid(std::string puzzle, std::vector<int> count);
-        bool pieceCountIsValid(std::vector<uint16_t> puzzle);
-        bool pieceCountIsValid(std::vector<uint16_t> puzzle, std::vector<int> count);
-
-        bool pieceHasRight(int piece)  { return ( (piece & 0x8) != 0 ); }
-        bool pieceHasLeft(int piece)   { return ( (piece & 0x4) != 0 ); }
-        bool pieceHasTop(int piece)    { return ( (piece & 0x1) != 0 ); }
-        bool pieceHasBottom(int piece) { return ( (piece & 0x2) != 0 ); }
-
-        bool checkAddition(std::vector<uint16_t> in, int inWidth, std::vector<uint16_t> added, int addedWidth);
-        bool checkAddition(std::vector<uint16_t> in, int inWidth, std::vector<uint16_t> added, int addedWidth, std::vector<int> previousCounts);
         bool checkAddition(std::string in, int inWidth, std::string added, int addedWidth);
         bool checkAddition(std::string in, int inWidth, std::string added, int addedWidth, std::vector<int> previousCounts);
+#ifndef USE_STRING_BLOCK
+        int getPiece(std::vector<uint16_t> block, int index);
+        std::vector<int> getPieceCounts(std::vector<uint16_t> puzzle);
+        bool pieceCountIsValid(std::vector<uint16_t> puzzle);
+        bool pieceCountIsValid(std::vector<uint16_t> puzzle, std::vector<int> count);
+        bool checkAddition(std::vector<uint16_t> in, int inWidth, std::vector<uint16_t> added, int addedWidth);
+        bool checkAddition(std::vector<uint16_t> in, int inWidth, std::vector<uint16_t> added, int addedWidth, std::vector<int> previousCounts);
+
+        // Useful if we're having to load/save stringed blocks
+        std::string utos (uint16_t block);
+        uint16_t stou (std::string block);
+#endif
+
+        bool pieceHasTop(int piece)    { return ( (piece & 0x1) != 0 ); }
+        bool pieceHasBottom(int piece) { return ( (piece & 0x2) != 0 ); }
+        bool pieceHasLeft(int piece)   { return ( (piece & 0x4) != 0 ); }
+        bool pieceHasRight(int piece)  { return ( (piece & 0x8) != 0 ); }
 
 
         // Puzzle data
@@ -79,14 +90,19 @@ class Puzzle {
         std::shared_timed_mutex mutex_savingBlocks;
 
         // Vectors of blocks
-        /*std::vector< std::vector<uint16_t> > leftBlocks;
-        std::vector< std::vector<uint16_t> > midBlocks;
-        std::vector< std::vector<uint16_t> > rightBlocks;*/
+#ifdef USE_STRING_BLOCK
         std::vector< std::string > leftBlocks;
         std::vector< std::string > midBlocks;
         std::vector< std::string > rightBlocks;
 
         std::vector< std::string > validSolutions;
+#else
+        std::vector< std::vector<uint16_t> > leftBlocks;
+        std::vector< std::vector<uint16_t> > midBlocks;
+        std::vector< std::vector<uint16_t> > rightBlocks;
+
+        std::vector< std::vector<uint16_t> > validSolutions;
+#endif
 
         // Storing data to files
         std::string leftBlockFileName  = "src/leftBlocks.txt" ;
@@ -94,6 +110,8 @@ class Puzzle {
         std::string rightBlockFileName = "src/rightBlocks.txt";
         std::string validFileName      = "src/validBlocks.txt";
 
+#ifdef USE_STRING_BLOCK
         void saveBlocks();
         void loadBlocks();
+#endif
 };

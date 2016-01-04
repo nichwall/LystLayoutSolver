@@ -16,34 +16,57 @@ Puzzle::~Puzzle() {
 
 }
 
-std::vector<std::string> Puzzle::getLeftBlocks()  { return leftBlocks;  }
-std::vector<std::string> Puzzle::getMidBlocks()   { return midBlocks;   }
-std::vector<std::string> Puzzle::getRightBlocks() { return rightBlocks; }
-std::string Puzzle::getLeftBlocks(int index) {
-    if (index > 0 && index < leftBlocks.size())
-        return leftBlocks[index];
-    return 0;
-}
-std::string Puzzle::getMidBlocks(int index) {
-    if (index > 0 && index < midBlocks.size())
-        return midBlocks[index];
-    return 0;
-}
-std::string Puzzle::getRightBlocks(int index) {
-    if (index > 0 && index < rightBlocks.size())
-        return rightBlocks[index];
-    return 0;
-}
-/*
-std::vector< std::vector<uint16_t> > Puzzle::getLeftBlocks()  { return leftBlocks;   }
-std::vector< std::vector<uint16_t> > Puzzle::getRightBlocks() { return rightBlocks;  }
-std::vector< std::vector<uint16_t> > Puzzle::getMidBlocks()   { return midBlocks;    }
-std::vector<uint16_t> Puzzle::getLeftBlocks(int index)        { return leftBlocks[index];  }
-std::vector<uint16_t> Puzzle::getRightBlocks(int index)       { return rightBlocks[index]; }
-std::vector<uint16_t> Puzzle::getMidBlocks(int index)         { return midBlocks[index];   }
-*/
-
 // Helper functions used for generating things
+int Puzzle::getPiece(std::string block, int index) {
+    if (index < block.length())
+        return (int)block[index]-96;
+    return 0;
+}
+std::vector<int> Puzzle::getPieceCounts(std::string puzzle) {
+    std::vector<int> count (height*width, 0);
+    for (int i=0; i<puzzle.size()*height; i++) {
+        int temp = getPiece(puzzle,i);
+        count[temp]++;
+    }
+    return count;
+}
+bool Puzzle::pieceCountIsValid(std::string puzzle) {
+    std::vector<int> count (height*width, 0);
+    return pieceCountIsValid(puzzle, count);
+}
+bool Puzzle::pieceCountIsValid(std::string puzzle, std::vector<int> count) {
+    for (int i=0; i<puzzle.length()*height; i++) {
+        int temp = getPiece(puzzle,i);
+        count[temp]++;
+        if (count[temp] > maxPieceCounts[temp])
+            return false;
+    }
+    return true;
+}
+bool Puzzle::checkAddition(std::string in, int inWidth, std::string added, int addedWidth) {
+    for (int i=0; i<height; i++) {
+        int leftPiece = getPiece(in, (i+1)*inWidth-1);
+        int rightPiece = getPiece(added, i*addedWidth);
+        if (pieceHasRight(leftPiece) != pieceHasLeft(rightPiece))
+            return false;
+        if (leftPiece == 8 && rightPiece == 4)
+            return false;
+    }
+    return pieceCountIsValid(in+added);
+}
+bool Puzzle::checkAddition(std::string in, int inWidth, std::string added, int addedWidth, std::vector<int> previousCounts) {
+    for (int i=0; i<height; i++) {
+        int leftPiece = getPiece(in, (i+1)*inWidth-1);
+        int rightPiece = getPiece(added, i*addedWidth);
+        if (pieceHasRight(leftPiece) != pieceHasLeft(rightPiece))
+            return false;
+        if (leftPiece == 8 && rightPiece == 4)
+            return false;
+    }
+    return pieceCountIsValid(added,previousCounts);
+}
+
+#ifndef USE_STRING_BLOCK
 int Puzzle::getPiece(std::vector<uint16_t> block, int index) {
     if ( index < block.size()*height ) {
         // Getting the column out of the vector
@@ -51,11 +74,6 @@ int Puzzle::getPiece(std::vector<uint16_t> block, int index) {
         // Getting the piece from the column
         return (tempVal / (int)pow(16,index%height) ) % 16;
     }
-    return 0;
-}
-int Puzzle::getPiece(std::string block, int index) {
-    if (index < block.length())
-        return (int)block[index]-96;
     return 0;
 }
 std::vector<int> Puzzle::getPieceCounts(std::vector<uint16_t> puzzle) {
@@ -72,19 +90,6 @@ bool Puzzle::pieceCountIsValid(std::vector<uint16_t> puzzle) {
 }
 bool Puzzle::pieceCountIsValid(std::vector<uint16_t> puzzle, std::vector<int> count) {
     for (int i=0; i<puzzle.size()*height; i++) {
-        int temp = getPiece(puzzle,i);
-        count[temp]++;
-        if (count[temp] > maxPieceCounts[temp])
-            return false;
-    }
-    return true;
-}
-bool Puzzle::pieceCountIsValid(std::string puzzle) {
-    std::vector<int> count (height*width, 0);
-    return pieceCountIsValid(puzzle, count);
-}
-bool Puzzle::pieceCountIsValid(std::string puzzle, std::vector<int> count) {
-    for (int i=0; i<puzzle.length()*height; i++) {
         int temp = getPiece(puzzle,i);
         count[temp]++;
         if (count[temp] > maxPieceCounts[temp])
@@ -118,28 +123,7 @@ bool Puzzle::checkAddition(std::vector<uint16_t> in, int inWidth, std::vector<ui
     }
     return pieceCountIsValid(added,previousCounts);
 }
-bool Puzzle::checkAddition(std::string in, int inWidth, std::string added, int addedWidth) {
-    for (int i=0; i<height; i++) {
-        int leftPiece = getPiece(in, (i+1)*inWidth-1);
-        int rightPiece = getPiece(added, i*addedWidth);
-        if (pieceHasRight(leftPiece) != pieceHasLeft(rightPiece))
-            return false;
-        if (leftPiece == 8 && rightPiece == 4)
-            return false;
-    }
-    return pieceCountIsValid(in+added);
-}
-bool Puzzle::checkAddition(std::string in, int inWidth, std::string added, int addedWidth, std::vector<int> previousCounts) {
-    for (int i=0; i<height; i++) {
-        int leftPiece = getPiece(in, (i+1)*inWidth-1);
-        int rightPiece = getPiece(added, i*addedWidth);
-        if (pieceHasRight(leftPiece) != pieceHasLeft(rightPiece))
-            return false;
-        if (leftPiece == 8 && rightPiece == 4)
-            return false;
-    }
-    return pieceCountIsValid(added,previousCounts);
-}
+#endif // ifndef USE_STRING_BLOCK
 
 void Puzzle::generateFirstSet() {
     generateFirstSet("");
@@ -164,30 +148,24 @@ void Puzzle::generateFirstSet(std::string in) {
         if (!r && !l)
             return;
 
-        // TODO: Change this to be a CMake flag for other sized puzzles
-        // Converting from std::string to short. Memory saver
-        uint16_t newBlock = 0;
-        for (int i=0; i<height; i++) {
-            newBlock += ((int)in.at(i)-96) * pow(16,i);
-        }
-        std::vector<uint16_t> newBlockVector;
-        newBlockVector.push_back(newBlock);
+#ifdef USE_STRING_BLOCK
+        std::string toAdd = in;
+#else
+        std::vector<uint16_t> toAdd = { stou(in) };
+#endif
 
         // Is a right block?
         if (!r && l) {
-            //rightBlocks.push_back(newBlockVector);
-            rightBlocks.push_back(in);
+            rightBlocks.push_back(toAdd);
             return;
         }
         // Left block?
         if (r && !l) {
-            //leftBlocks.push_back(newBlockVector);
-            leftBlocks.push_back(in);
+            leftBlocks.push_back(toAdd);
             return;
         }
         // Otherwise, it's a mid block
-        //midBlocks.push_back(newBlockVector);
-        midBlocks.push_back(in);
+        midBlocks.push_back(toAdd);
         return;
     }
 
@@ -226,10 +204,13 @@ void Puzzle::generateFirstSet(std::string in) {
 
 // Generate all of the blocks of desired width
 void Puzzle::makeBlocks() {
+#ifdef USE_STRING_BLOCK
+    // Testing CMake things
     // Try to load blocks from a previous run
     loadBlocks();
     // If nothing was loaded, then we need to generate the initial pieces
     if (midBlocks.size() == 0 || rightBlocks.size() == 0)
+#endif
         generateFirstSet();
 
     printf("Block counts: %d\t%d\t%d\n",leftBlocks.size(),midBlocks.size(),rightBlocks.size());
@@ -259,16 +240,21 @@ void Puzzle::combineLeftBlocks() {
             mutex_left.unlock();
             break;
         }
-        //std::vector<uint16_t> currentLeft = leftBlocks.back();
+#ifdef USE_STRING_BLOCK
         std::string currentLeft = leftBlocks.back();
+#else
+        std::vector<uint16_t> currentLeft = leftBlocks.back();
+#endif
         leftBlocks.pop_back();
         totalRemoved++;
         // If total removed elements is less than the thread count after mod, save the blocks
+#ifdef USE_STRING_BLOCK
         if (totalRemoved % 30000 == 0) {
             mutex_savingBlocks.lock();
             saveBlocks();
             mutex_savingBlocks.unlock();
         }
+#endif
         mutex_left.unlock();
 
 
@@ -289,44 +275,54 @@ void Puzzle::combineLeftBlocks() {
         if (currentLeft.size() < 5) {
             printf("Current left size: %d\tvector size: %d\ttotal removed: ",currentLeft.size(),leftBlocks.size());
             std::cout << totalRemoved << "\n";
-/*            for (int i=0; i<currentLeft.size(); i++) {
-                std::cout << "\t" << currentLeft[i];
-            }
-            printf("\n");*/
         }
 
         // If we're using the middle pieces
         if (!useRight) {
             for (int i=0; i<midBlocks.size(); i++) {
                 // Check if we can add it
+#ifdef USE_STRING_BLOCK
+                if ( !checkAddition( currentLeft, currentLeft.length(), midBlocks[i], midBlocks[i].length()) )
+#else
                 if ( !checkAddition( currentLeft, currentLeft.size(), midBlocks[i], midBlocks[i].size()) )
+#endif
                     continue;
-                //std::vector<uint16_t> temp = currentLeft;
-                //printf("Temp size: %d\tmidBlocks size: %d\n",temp.size(),midBlocks[i].size());
-                //for (int j=0; j<midBlocks[i].size(); j++) {
-                //    temp.push_back(midBlocks[i][j]);
-                //}
+                
                 mutex_left.lock();
-                //leftBlocks.push_back( temp );
                 mutex_savingBlocks.lock_shared();
+#ifdef USE_STRING_BLOCK
                 leftBlocks.push_back( currentLeft+midBlocks[i] );
+#else
+                std::vector<uint16_t> temp = currentLeft;
+                for (int j=0; j<midBlocks[i].size(); j++) {
+                    temp.push_back(midBlocks[i][j]);
+                }
+                leftBlocks.push_back( temp );
+#endif
                 mutex_savingBlocks.unlock_shared();
-                //printf("Found something, new size %d\tleftBlocks: %d\n",temp.size(),leftBlocks.size());
                 mutex_left.unlock();
             }
         } else {
             for (int i=0; i<rightBlocks.size(); i++) {
                 // Check if we can add it
+#ifdef USE_STRING_BLOCK
+                if ( !checkAddition( currentLeft, currentLeft.length(), rightBlocks[i], rightBlocks[i].length()) )
+#else
                 if ( !checkAddition( currentLeft, currentLeft.size(), rightBlocks[i], rightBlocks[i].size()) )
+#endif
                     continue;
-                //std::vector<uint16_t> temp = currentLeft;
-                //for (int j=0; j<rightBlocks[i].size(); j++) {
-                //    temp.push_back(rightBlocks[i][j]);
-                //}
+
                 mutex_left.lock();
-                //leftBlocks.push_back( temp );
                 mutex_savingBlocks.lock_shared();
+#ifdef USE_STRING_BLOCK
                 leftBlocks.push_back( currentLeft+rightBlocks[i] );
+#else
+                std::vector<uint16_t> temp = currentLeft;
+                for (int j=0; j<rightBlocks[i].size(); j++) {
+                    temp.push_back(rightBlocks[i][j]);
+                }
+                leftBlocks.push_back( temp );
+#endif
                 mutex_savingBlocks.unlock_shared();
                 mutex_left.unlock();
             }
@@ -334,6 +330,7 @@ void Puzzle::combineLeftBlocks() {
     }
 }
 
+#ifdef USE_STRING_BLOCK
 // Block saving functions
 void Puzzle::saveBlocks() {
     // Write left blocks
@@ -406,3 +403,34 @@ void Puzzle::loadBlocks() {
         validFile.close();
     }
 }
+#endif
+
+#ifndef USE_STRING_BLOCK
+uint16_t Puzzle::stou (std::string block) {
+    // Converting from std::string to short.
+    uint16_t newBlock = 0;
+    for (int i=0; i<height; i++) {
+        newBlock += ((int)block.at(i)-96) * pow(16,i);
+    }
+    return newBlock;
+}
+std::string Puzzle::utos (uint16_t block) {
+    std::vector<uint16_t> vect = { block };
+    // Converting from uint16_t to std::string
+    std::string newBlock = "";
+    for (int i=0; i<height; i++) {
+        char temp = (char)('a'-1);
+        // Adding to the block
+        if ( pieceHasTop( getPiece(vect,i) ) )
+            temp += 1;
+        if ( pieceHasBottom( getPiece(vect,i) ) )
+            temp += 2;
+        if ( pieceHasLeft( getPiece(vect,i) ) )
+            temp += 4;
+        if ( pieceHasRight( getPiece(vect,i) ) )
+            temp += 8;
+        newBlock += temp;
+    }
+    return newBlock;
+}
+#endif

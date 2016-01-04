@@ -249,11 +249,13 @@ void Puzzle::combineLeftBlocks() {
         totalRemoved++;
         // If total removed elements is less than the thread count after mod, save the blocks
 #ifdef USE_STRING_BLOCK
+#ifdef STORE_COMP
         if (totalRemoved % 30000 == 0) {
             mutex_savingBlocks.lock();
             saveBlocks();
             mutex_savingBlocks.unlock();
         }
+#endif
 #endif
         mutex_left.unlock();
 
@@ -289,7 +291,9 @@ void Puzzle::combineLeftBlocks() {
                     continue;
                 
                 mutex_left.lock();
+#ifdef STORE_COMP
                 mutex_savingBlocks.lock_shared();
+#endif
 #ifdef USE_STRING_BLOCK
                 leftBlocks.push_back( currentLeft+midBlocks[i] );
 #else
@@ -299,7 +303,9 @@ void Puzzle::combineLeftBlocks() {
                 }
                 leftBlocks.push_back( temp );
 #endif
+#ifdef STORE_COMP
                 mutex_savingBlocks.unlock_shared();
+#endif
                 mutex_left.unlock();
             }
         } else {
@@ -313,7 +319,9 @@ void Puzzle::combineLeftBlocks() {
                     continue;
 
                 mutex_left.lock();
+#ifdef STORE_COMP
                 mutex_savingBlocks.lock_shared();
+#endif
 #ifdef USE_STRING_BLOCK
                 leftBlocks.push_back( currentLeft+rightBlocks[i] );
 #else
@@ -323,7 +331,9 @@ void Puzzle::combineLeftBlocks() {
                 }
                 leftBlocks.push_back( temp );
 #endif
+#ifdef STORE_COMP
                 mutex_savingBlocks.unlock_shared();
+#endif
                 mutex_left.unlock();
             }
         }

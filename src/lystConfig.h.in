@@ -1,1 +1,2 @@
 #cmakedefine USE_STRING_BLOCK @USE_STRING_BLOCK@
+#cmakedefine STORE_COMP @STORE_COMP@

@@ -1,3 +1,6 @@
+#ifndef _SRC_LYST_H_
+#define _SRC_LYST_H_
+
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
@@ -6,11 +9,15 @@
 #include <string>
 #include <thread>
 #include <mutex>
-#include <shared_mutex>
 #include <algorithm>
 #include <math.h>
 
 #include "lystConfig.h"
+
+// Don't use shared_mutex if we don't need it. Travis doesn't like it
+#ifdef STORE_COMP
+#include <shared_mutex>
+#endif
 
 class Puzzle {
     public:
@@ -87,7 +94,9 @@ class Puzzle {
         unsigned int max_threads;
         std::mutex mutex_left;
         std::mutex mutex_valid;
+#ifdef STORE_COMP
         std::shared_timed_mutex mutex_savingBlocks;
+#endif
 
         // Vectors of blocks
 #ifdef USE_STRING_BLOCK
@@ -115,3 +124,5 @@ class Puzzle {
         void loadBlocks();
 #endif
 };
+
+#endif

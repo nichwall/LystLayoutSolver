@@ -21,6 +21,7 @@ int main(int argc, char **argv) {
     for (int i=0; i<valid.size(); i++) {
         std::cout << valid[i] << "\n";
     }
+    saveBlocks();
     return 0;
 #else
 //    std::vector< std::vector<uint16_t> > left = a.getLeftBlocks();

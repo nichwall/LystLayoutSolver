@@ -13,11 +13,11 @@ configure_file (
 option (USE_STRING_BLOCK "Set ON for std::string vectors, OFF for uint16_t vectors" ON)
 option (STORE_COMP "Set ON to store vectors periodically. USE_STRING_BLOCK must be ON" OFF)
 
-# If we can avoid using C++14, do it.
+# If we can avoid using C++14, do it. Travis doesn't like it yet
 if (STORE_COMP)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -O3")
 else ()
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -O3")
 endif ()
 
 # Adding extra libraries for displays and things

@@ -4,12 +4,22 @@ Puzzle::Puzzle() {
     maxPieceCounts = {0,0,0,0,0,0,0,0};
     height = width = 0;
     max_threads = std::thread::hardware_concurrency();
+
+    leftBlockFileName  = "leftBlocks.txt";
+    midBlockFileName   = "midBlocks.txt";
+    rightBlockFileName = "rightBlocks.txt";
+    validFileName      = "validBlocks.txt";
 }
 Puzzle::Puzzle(std::vector<int> pieceCountData, int puzzleHeight, int puzzleWidth) {
     maxPieceCounts = pieceCountData;
     height = puzzleHeight;
     width = puzzleWidth;
     max_threads = std::thread::hardware_concurrency();
+
+    leftBlockFileName  = "leftBlocks.txt";
+    midBlockFileName   = "midBlocks.txt";
+    rightBlockFileName = "rightBlocks.txt";
+    validFileName      = "validBlocks.txt";
 }
 
 Puzzle::~Puzzle() {

@@ -114,10 +114,10 @@ class Puzzle {
 #endif
 
         // Storing data to files
-        std::string leftBlockFileName  = "src/leftBlocks.txt" ;
-        std::string midBlockFileName   = "src/midBlocks.txt"  ;
-        std::string rightBlockFileName = "src/rightBlocks.txt";
-        std::string validFileName      = "src/validBlocks.txt";
+        std::string leftBlockFileName;
+        std::string midBlockFileName;
+        std::string rightBlockFileName;
+        std::string validFileName;
 
 #ifdef USE_STRING_BLOCK
         void saveBlocks();

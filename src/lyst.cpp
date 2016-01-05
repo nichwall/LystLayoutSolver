@@ -1,7 +1,7 @@
 #include "lyst.h"
 
 Puzzle::Puzzle() {
-    maxPieceCounts = {0,0,0,0,0,0,0,0};
+    maxPieceCounts = {0};
     height = width = 0;
     max_threads = std::thread::hardware_concurrency();
 
@@ -9,6 +9,8 @@ Puzzle::Puzzle() {
     midBlockFileName   = "midBlocks.txt";
     rightBlockFileName = "rightBlocks.txt";
     validFileName      = "validBlocks.txt";
+
+    verbosity_level = 5;
 }
 Puzzle::Puzzle(std::vector<int> pieceCountData, int puzzleHeight, int puzzleWidth) {
     maxPieceCounts = pieceCountData;
@@ -20,6 +22,8 @@ Puzzle::Puzzle(std::vector<int> pieceCountData, int puzzleHeight, int puzzleWidt
     midBlockFileName   = "midBlocks.txt";
     rightBlockFileName = "rightBlocks.txt";
     validFileName      = "validBlocks.txt";
+
+    verbosity_level = 5;
 }
 
 Puzzle::~Puzzle() {
@@ -214,22 +218,16 @@ void Puzzle::generateFirstSet(std::string in) {
 
 // Generate all of the blocks of desired width
 void Puzzle::makeBlocks() {
-#ifdef USE_STRING_BLOCK
-    // Testing CMake things
-    // Try to load blocks from a previous run
-    loadBlocks();
-    // If nothing was loaded, then we need to generate the initial pieces
-    if (midBlocks.size() == 0 || rightBlocks.size() == 0)
-#endif // ifdef USE_STRING_BLOCK
-        generateFirstSet();
+    generateFirstSet();
 
     printf("Block counts: %d\t%d\t%d\n",leftBlocks.size(),midBlocks.size(),rightBlocks.size());
 
     printf("Max threads: %d\n",max_threads);
 
-#ifdef BREADTH_SERACH
-    while (leftBlocks().size() != 0 && leftWidth != width) {
-#endif
+#ifdef BREADTH_SEARCH
+    leftWidth = 1;
+    while (leftBlocks.size() != 0 && leftWidth != width) {
+#endif // ifdef BREADTH_SEARCH
         // Start the threads
         std::vector<std::thread> threadPool;
         for (int i=0; i<max_threads; i++) {
@@ -246,12 +244,13 @@ void Puzzle::makeBlocks() {
             leftWidth = leftBlocks[0].length()/height;
 #else
             leftWidth = leftBlocks[0].size();
-#endif
+#endif // ifdef USE_STRING_BLOCK
         } else {
             leftWidth = 0;
         }
+        printf("Left width: %d\tBlocks: %d\n",leftWidth,leftBlocks.size());
     }
-#endif
+#endif // ifdef BREADTH_SEARCH
 
     return;
 }
@@ -274,16 +273,6 @@ void Puzzle::combineLeftBlocks() {
 #endif
         leftBlocks.pop_back();
         totalRemoved++;
-        // If total removed elements is less than the thread count after mod, save the blocks
-#ifdef USE_STRING_BLOCK
-#ifdef STORE_COMP
-        if (totalRemoved % 30000 == 0) {
-            mutex_savingBlocks.lock();
-            saveBlocks();
-            mutex_savingBlocks.unlock();
-        }
-#endif
-#endif
         mutex_left.unlock();
 
 
@@ -300,6 +289,14 @@ void Puzzle::combineLeftBlocks() {
             continue;
         }
 
+        printf("Hey there\n");
+#ifdef BREADTH_SEARCH
+        // Check if we should output information about runtime
+        if ( currentLeft.size() <= verbosity_level ) {
+            printf("Left blocks: %d\tSize: %d\tRemoved: %d\n",leftBlocks.size(),currentLeft.size(),totalRemoved);
+        }
+#endif
+
         // If we're using the middle pieces
         if (!useRight) {
             for (int i=0; i<midBlocks.size(); i++) {
@@ -312,9 +309,6 @@ void Puzzle::combineLeftBlocks() {
                     continue;
                 
                 mutex_left.lock();
-#ifdef STORE_COMP
-                mutex_savingBlocks.lock_shared();
-#endif
 #ifdef USE_STRING_BLOCK
 #ifdef BREADTH_SEARCH
                 tempLeft.push_back( currentLeft+midBlocks[i] );
@@ -332,9 +326,6 @@ void Puzzle::combineLeftBlocks() {
                 leftBlocks.push_back( temp );
 #endif
 #endif
-#ifdef STORE_COMP
-                mutex_savingBlocks.unlock_shared();
-#endif
                 mutex_left.unlock();
             }
         } else {
@@ -348,9 +339,6 @@ void Puzzle::combineLeftBlocks() {
                     continue;
 
                 mutex_left.lock();
-#ifdef STORE_COMP
-                mutex_savingBlocks.lock_shared();
-#endif
 #ifdef USE_STRING_BLOCK
 #ifdef BREADTH_SEARCH
                 tempLeft.push_back( currentLeft+midBlocks[i] );
@@ -368,89 +356,11 @@ void Puzzle::combineLeftBlocks() {
                 leftBlocks.push_back( temp );
 #endif
 #endif
-#ifdef STORE_COMP
-                mutex_savingBlocks.unlock_shared();
-#endif
                 mutex_left.unlock();
             }
         }
     }
 }
-
-#ifdef USE_STRING_BLOCK
-// Block saving functions
-void Puzzle::saveBlocks() {
-    // Write left blocks
-    std::ofstream leftBlockFile (leftBlockFileName.c_str());
-    if (leftBlockFile.good()) {
-        for (int i=0; i<leftBlocks.size(); i++) {
-            leftBlockFile << leftBlocks[i] << "\n";
-        }
-        leftBlockFile.close();
-    }
-    // Write mid blocks
-    std::ofstream midBlockFile (midBlockFileName.c_str());
-    if (midBlockFile.good()) {
-        for (int i=0; i<midBlocks.size(); i++) {
-            midBlockFile << midBlocks[i] << "\n";
-        }
-        midBlockFile.close();
-    }
-    // Write right blocks
-    std::ofstream rightBlockFile (rightBlockFileName.c_str());
-    if (rightBlockFile.good()) {
-        for (int i=0; i<rightBlocks.size(); i++) {
-            rightBlockFile << rightBlocks.size() << "\n";
-        }
-        rightBlockFile.close();
-    }
-    // Write blocks that are already long enough
-    std::ofstream validFile (validFileName.c_str());
-    if (validFile.good()) {
-        for (int i=0; i<validSolutions.size(); i++) {
-            validFile << validSolutions[i] << "\n";
-        }
-        validFile.close();
-    }
-}
-// Block loading functions
-void Puzzle::loadBlocks() {
-    std::string line;
-    // Warning: will replace old vectors if there is a save file
-    std::ifstream leftBlockFile (leftBlockFileName.c_str());
-    if (leftBlockFile.good()) {
-        leftBlocks.clear();
-        while ( getline(leftBlockFile, line) ) {
-            leftBlocks.push_back(line);
-        }
-        leftBlockFile.close();
-    }
-    std::ifstream midBlockFile (midBlockFileName.c_str());
-    if (midBlockFile.good()) {
-        midBlocks.clear();
-        while ( getline(midBlockFile, line) ) {
-            midBlocks.push_back(line);
-        }
-        midBlockFile.close();
-    }
-    std::ifstream rightBlockFile (rightBlockFileName.c_str());
-    if (rightBlockFile.good()) {
-        rightBlocks.clear();
-        while ( getline(rightBlockFile, line) ) {
-            rightBlocks.push_back(line);
-        }
-        rightBlockFile.close();
-    }
-    std::ifstream validFile (validFileName.c_str());
-    if (validFile.good()) {
-        validSolutions.clear();
-        while ( getline(validFile, line) ) {
-            validSolutions.push_back(line);
-        }
-        validFile.close();
-    }
-}
-#endif
 
 #ifndef USE_STRING_BLOCK
 uint16_t Puzzle::stou (std::string block) {

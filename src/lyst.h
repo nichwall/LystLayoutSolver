@@ -15,9 +15,6 @@
 #include "lystConfig.h"
 
 // Don't use shared_mutex if we don't need it. Travis doesn't like it
-#ifdef STORE_COMP
-#include <shared_mutex>
-#endif
 
 class Puzzle {
     public:
@@ -34,7 +31,9 @@ class Puzzle {
         int getMaxThreads()   { return max_threads; }
 
         void setMaxThreads(int threadCount) { if (threadCount > 0) max_threads = threadCount; }
+        void setVerbosity(int verbosity) { if (verbosity > 0) verbosity_level = verbosity; }
         
+        std::vector<int> getMaxPieceCount() { return maxPieceCounts; }
 #ifdef USE_STRING_BLOCK
         std::vector<std::string> getLeftBlocks()  { return leftBlocks;     }
         std::vector<std::string> getMidBlocks()   { return midBlocks;      }
@@ -58,10 +57,6 @@ class Puzzle {
         // Block creations
         void makeBlocks();
 
-#ifdef USE_STRING_BLOCK
-        void saveBlocks();
-        void loadBlocks();
-#endif
     private:
         // Functions related to block generation
         void generateFirstSet();
@@ -100,11 +95,9 @@ class Puzzle {
             width;
         std::vector<int> maxPieceCounts;
         unsigned int max_threads;
+        int verbosity_level;
         std::mutex mutex_left;
         std::mutex mutex_valid;
-#ifdef STORE_COMP
-        std::shared_timed_mutex mutex_savingBlocks;
-#endif
 
         // Vectors of blocks
 #ifdef USE_STRING_BLOCK

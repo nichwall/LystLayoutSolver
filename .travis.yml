@@ -16,3 +16,8 @@ addons:
             - g++-5
 
 script: ./CIbuild.sh
+
+branches:
+    only:
+        - master
+        - nosaves

@@ -5,11 +5,6 @@ Puzzle::Puzzle() {
     height = width = 0;
     max_threads = std::thread::hardware_concurrency();
 
-    leftBlockFileName  = "leftBlocks.txt";
-    midBlockFileName   = "midBlocks.txt";
-    rightBlockFileName = "rightBlocks.txt";
-    validFileName      = "validBlocks.txt";
-
     verbosity_level = 5;
 }
 Puzzle::Puzzle(std::vector<int> pieceCountData, int puzzleHeight, int puzzleWidth) {
@@ -17,11 +12,6 @@ Puzzle::Puzzle(std::vector<int> pieceCountData, int puzzleHeight, int puzzleWidt
     height = puzzleHeight;
     width = puzzleWidth;
     max_threads = std::thread::hardware_concurrency();
-
-    leftBlockFileName  = "leftBlocks.txt";
-    midBlockFileName   = "midBlocks.txt";
-    rightBlockFileName = "rightBlocks.txt";
-    validFileName      = "validBlocks.txt";
 
     verbosity_level = 5;
 }
@@ -44,13 +34,15 @@ std::vector<int> Puzzle::getPieceCounts(std::string puzzle) {
     }
     return count;
 }
+// Piece count is valid, entire puzzle
 bool Puzzle::pieceCountIsValid(std::string puzzle) {
-    std::vector<int> count (height*width, 0);
+    std::vector<int> count (16, 0);
     return pieceCountIsValid(puzzle, count);
 }
-bool Puzzle::pieceCountIsValid(std::string puzzle, std::vector<int> count) {
-    for (int i=0; i<puzzle.length()*height; i++) {
-        int temp = getPiece(puzzle,i);
+// Piece count is valid, only new section of the puzzle
+bool Puzzle::pieceCountIsValid(std::string newPart, std::vector<int> count) {
+    for (int i=0; i<newPart.length(); i++) {
+        int temp = getPiece(newPart,i);
         count[temp]++;
         if (count[temp] > maxPieceCounts[temp])
             return false;
@@ -197,6 +189,10 @@ void Puzzle::generateFirstSet(std::string in) {
             continue;
         // Check if we have too many of a piece
         std::vector<int> counts (16,0);
+        // Breaks piece counts
+        if ( !pieceCountIsValid(in+(char)(i+96)) )
+            continue;
+
         bool broken = false;
         for (int j=0; j<in.length(); j++) {
             int temp = getPiece(in,j);
@@ -222,8 +218,17 @@ void Puzzle::makeBlocks() {
 
     printf("Block counts: %d\t%d\t%d\n",leftBlocks.size(),midBlocks.size(),rightBlocks.size());
 
+    for (int i=0; i<leftBlocks.size(); i++) {
+        std::cout << leftBlocks[i] << "\n";
+    }
+    printf("Right blocks\n");
+    for (int i=0; i<rightBlocks.size(); i++) {
+        std::cout << rightBlocks[i] << "\n";
+    }
+
     printf("Max threads: %d\n",max_threads);
 
+    return;
 #ifdef BREADTH_SEARCH
     leftWidth = 1;
     while (leftBlocks.size() != 0 && leftWidth != width) {
@@ -237,6 +242,7 @@ void Puzzle::makeBlocks() {
             threadPool[i].join();
         }
 #ifdef BREADTH_SEARCH
+        mutex_left.lock();
         leftBlocks.swap(tempLeft);
         tempLeft.clear();
         if (leftBlocks.size() != 0) {
@@ -249,6 +255,7 @@ void Puzzle::makeBlocks() {
             leftWidth = 0;
         }
         printf("Left width: %d\tBlocks: %d\n",leftWidth,leftBlocks.size());
+        mutex_left.unlock();
     }
 #endif // ifdef BREADTH_SEARCH
 
@@ -344,18 +351,18 @@ void Puzzle::combineLeftBlocks() {
                 tempLeft.push_back( currentLeft+midBlocks[i] );
 #else
                 leftBlocks.push_back( currentLeft+midBlocks[i] );
-#endif
-#else
+#endif // ifdef BREADTH_SEARCH
+#else  // ifdef USE_STRING_BLOCK
                 std::vector<uint16_t> temp = currentLeft;
                 for (int j=0; j<rightBlocks[i].size(); j++) {
                     temp.push_back(rightBlocks[i][j]);
                 }
 #ifdef BREADTH_SEARCH
                 tempLeft.push_back( temp );
-#else
+#else // ifdef BREADTH_SEARCH
                 leftBlocks.push_back( temp );
-#endif
-#endif
+#endif // ifdef BREADTH_SEARCH
+#endif // ifdef USE_STRING_BLOCK
                 mutex_left.unlock();
             }
         }
@@ -376,7 +383,7 @@ std::string Puzzle::utos (uint16_t block) {
     // Converting from uint16_t to std::string
     std::string newBlock = "";
     for (int i=0; i<height; i++) {
-        char temp = (char)('a'-1);
+        char temp = 96;
         // Adding to the block
         if ( pieceHasTop( getPiece(vect,i) ) )
             temp += 1;

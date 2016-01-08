@@ -122,12 +122,6 @@ class Puzzle {
 #endif
 #endif
 
-        // Storing data to files
-        std::string leftBlockFileName;
-        std::string midBlockFileName;
-        std::string rightBlockFileName;
-        std::string validFileName;
-
 };
 
 #endif

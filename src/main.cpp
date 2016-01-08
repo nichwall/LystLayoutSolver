@@ -10,6 +10,10 @@ int main(int argc, char **argv) {
     int puzzleHeight = 3,
         puzzleWidth = 4;
 
+    for (int i=1; i<pieces.size(); i++) {
+        std::cout << (char)(96+i) << ": " << pieces[i] << "\n";
+    }
+
     Puzzle a (pieces, puzzleHeight, puzzleWidth);
     if (argc == 2) {
         a.setMaxThreads(atoi(argv[1]));

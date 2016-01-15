@@ -217,9 +217,9 @@ void Puzzle::generateFirstSet(std::string in) {
 void Puzzle::makeBlocks() {
     generateFirstSet();
 
-    printf("Block counts: %d\t%d\t%d\n",leftBlocks.size(),midBlocks.size(),rightBlocks.size());
+    printf("Block counts: %u\t%u\t%u\n",leftBlocks.size(),midBlocks.size(),rightBlocks.size());
 
-    printf("Max threads: %d\n",max_threads);
+    printf("Max threads: %u\n",max_threads);
 
 #ifdef BREADTH_SEARCH
     leftWidth = 1;
@@ -246,7 +246,7 @@ void Puzzle::makeBlocks() {
         } else {
             leftWidth = 0;
         }
-        printf("Left width: %d\tBlocks: %d\n",leftWidth,leftBlocks.size());
+        printf("Left width: %d\tBlocks: %u\n",leftWidth,leftBlocks.size());
         mutex_left.unlock();
     }
 #endif // ifdef BREADTH_SEARCH
@@ -291,7 +291,7 @@ void Puzzle::combineLeftBlocks() {
 #ifdef USE_STRING_BLOCK
         // Check if we should output information about runtime
         if ( currentLeft.size()/height <= verbosity_level ) {
-            printf("V-Level: %d\tLeft blocks: %d\tSize: %d\tRemoved: %d\n",verbosity_level,leftBlocks.size(),currentLeft.size(),totalRemoved);
+            printf("V-Level: %d\tLeft blocks: %u\tSize: %u\tRemoved: %u\n",verbosity_level,leftBlocks.size(),currentLeft.size(),totalRemoved);
         }
 #endif
 

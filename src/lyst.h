@@ -26,32 +26,32 @@ class Puzzle {
         ~Puzzle();
 
         // Accessors
-        int getPuzzleHeight() { return height;      }
-        int getPuzzleWidth()  { return width;       }
-        int getMaxThreads()   { return max_threads; }
+        inline int getPuzzleHeight() { return height;      }
+        inline int getPuzzleWidth()  { return width;       }
+        inline int getMaxThreads()   { return max_threads; }
 
-        void setMaxThreads(int threadCount) { if (threadCount > 0) max_threads = threadCount; }
-        void setVerbosity(int verbosity) { if (verbosity > 0) verbosity_level = verbosity; }
+        inline void setMaxThreads(int threadCount) { if (threadCount > 0) max_threads = threadCount; }
+        inline void setVerbosity(int verbosity) { if (verbosity > 0) verbosity_level = verbosity; }
         
-        std::vector<int> getMaxPieceCount() { return maxPieceCounts; }
+        inline std::vector<int> getMaxPieceCount() { return maxPieceCounts; }
 #ifdef USE_STRING_BLOCK
-        std::vector<std::string> getLeftBlocks()  { return leftBlocks;     }
-        std::vector<std::string> getMidBlocks()   { return midBlocks;      }
-        std::vector<std::string> getRightBlocks() { return rightBlocks;    }
-        std::vector<std::string> getValidBlocks() { return validSolutions; }
-        std::string getLeftBlocks(int index)      { return leftBlocks[index];     }
-        std::string getMidBlocks(int index)       { return midBlocks[index];      }
-        std::string getRightBlocks(int index)     { return rightBlocks[index];    }
-        std::string getValidBlocks(int index)     { return validSolutions[index]; }
+        inline std::vector<std::string> getLeftBlocks()  { return leftBlocks;     }
+        inline std::vector<std::string> getMidBlocks()   { return midBlocks;      }
+        inline std::vector<std::string> getRightBlocks() { return rightBlocks;    }
+        inline std::vector<std::string> getValidBlocks() { return validSolutions; }
+        inline std::string getLeftBlocks(int index)      { return leftBlocks[index];     }
+        inline std::string getMidBlocks(int index)       { return midBlocks[index];      }
+        inline std::string getRightBlocks(int index)     { return rightBlocks[index];    }
+        inline std::string getValidBlocks(int index)     { return validSolutions[index]; }
 #else
-        std::vector< std::vector<uint16_t> > getLeftBlocks()  { return leftBlocks;     }
-        std::vector< std::vector<uint16_t> > getMidBlocks()   { return midBlocks;      }
-        std::vector< std::vector<uint16_t> > getRightBlocks() { return rightBlocks;    }
-        std::vector< std::vector<uint16_t> > getValidBlocks() { return validSolutions; }
-        std::vector<uint16_t> getLeftBlocks(int index)        { return leftBlocks[index];     }
-        std::vector<uint16_t> getMidBlocks(int index)         { return midBlocks[index];      }
-        std::vector<uint16_t> getRightBlocks(int index)       { return rightBlocks[index];    }
-        std::vector<uint16_t> getValidBlocks(int index)       { return validSolutions[index]; }
+        inline std::vector< std::vector<uint16_t> > getLeftBlocks()  { return leftBlocks;     }
+        inline std::vector< std::vector<uint16_t> > getMidBlocks()   { return midBlocks;      }
+        inline std::vector< std::vector<uint16_t> > getRightBlocks() { return rightBlocks;    }
+        inline std::vector< std::vector<uint16_t> > getValidBlocks() { return validSolutions; }
+        inline std::vector<uint16_t> getLeftBlocks(int index)        { return leftBlocks[index];     }
+        inline std::vector<uint16_t> getMidBlocks(int index)         { return midBlocks[index];      }
+        inline std::vector<uint16_t> getRightBlocks(int index)       { return rightBlocks[index];    }
+        inline std::vector<uint16_t> getValidBlocks(int index)       { return validSolutions[index]; }
 #endif
 
         // Block creations
@@ -89,7 +89,6 @@ class Puzzle {
         inline bool pieceHasLeft(int piece)   { return ( (piece & 0x4) != 0 ); }
         inline bool pieceHasRight(int piece)  { return ( (piece & 0x8) != 0 ); }
 
-
         // Puzzle data
         int height,
             width;
@@ -121,7 +120,6 @@ class Puzzle {
         int leftWidth;
 #endif
 #endif
-
 };
 
 #endif

@@ -24,7 +24,7 @@ Puzzle::~Puzzle() {
 int Puzzle::getPiece(std::string block, int index) {
     if (index < block.length())
         return (int)block[index]-96;
-    return 0;
+    return -1;
 }
 std::vector<int> Puzzle::getPieceCounts(std::string puzzle) {
     std::vector<int> count (height*width, 0);
@@ -51,10 +51,11 @@ bool Puzzle::pieceCountIsValid(std::string newPart, std::vector<int> count) {
 }
 bool Puzzle::checkAddition(std::string in, int inWidth, std::string added, int addedWidth) {
     for (int i=0; i<height; i++) {
-        int leftPiece = getPiece(in, (i+1)*inWidth-1);
-        int rightPiece = getPiece(added, i*addedWidth);
-        if (pieceHasRight(leftPiece) != pieceHasLeft(rightPiece))
+        int leftPiece = getPiece(in, in.length()-3+i);
+        int rightPiece = getPiece(added, i);
+        if (pieceHasRight(leftPiece) != pieceHasLeft(rightPiece)) {
             return false;
+        }
         if (leftPiece == 8 && rightPiece == 4)
             return false;
     }
@@ -218,17 +219,8 @@ void Puzzle::makeBlocks() {
 
     printf("Block counts: %d\t%d\t%d\n",leftBlocks.size(),midBlocks.size(),rightBlocks.size());
 
-    for (int i=0; i<leftBlocks.size(); i++) {
-        std::cout << leftBlocks[i] << "\n";
-    }
-    printf("Right blocks\n");
-    for (int i=0; i<rightBlocks.size(); i++) {
-        std::cout << rightBlocks[i] << "\n";
-    }
-
     printf("Max threads: %d\n",max_threads);
 
-    return;
 #ifdef BREADTH_SEARCH
     leftWidth = 1;
     while (leftBlocks.size() != 0 && leftWidth != width) {
@@ -286,9 +278,9 @@ void Puzzle::combineLeftBlocks() {
         // Check whether we need to loop through all of the middle pieces or the right pieces
         // or if we're done
         bool useRight = false;
-        if ( currentLeft.size() == width - 1 ) {
+        if ( currentLeft.size()/height == width - 1 ) {
             useRight = true;
-        } else if ( currentLeft.size() == width ) {
+        } else if ( currentLeft.size()/height == width ) {
         // If total removed elements is less than the thread count after mod, save the blocks
             mutex_valid.lock();
             validSolutions.push_back(currentLeft);
@@ -296,11 +288,10 @@ void Puzzle::combineLeftBlocks() {
             continue;
         }
 
-        printf("Hey there\n");
-#ifdef BREADTH_SEARCH
+#ifdef USE_STRING_BLOCK
         // Check if we should output information about runtime
-        if ( currentLeft.size() <= verbosity_level ) {
-            printf("Left blocks: %d\tSize: %d\tRemoved: %d\n",leftBlocks.size(),currentLeft.size(),totalRemoved);
+        if ( currentLeft.size()/height <= verbosity_level ) {
+            printf("V-Level: %d\tLeft blocks: %d\tSize: %d\tRemoved: %d\n",verbosity_level,leftBlocks.size(),currentLeft.size(),totalRemoved);
         }
 #endif
 
@@ -309,7 +300,7 @@ void Puzzle::combineLeftBlocks() {
             for (int i=0; i<midBlocks.size(); i++) {
                 // Check if we can add it
 #ifdef USE_STRING_BLOCK
-                if ( !checkAddition( currentLeft, currentLeft.length(), midBlocks[i], midBlocks[i].length()) )
+                if ( !checkAddition( currentLeft, currentLeft.length()/height, midBlocks[i], midBlocks[i].length()/height) )
 #else
                 if ( !checkAddition( currentLeft, currentLeft.size(), midBlocks[i], midBlocks[i].size()) )
 #endif
@@ -348,9 +339,9 @@ void Puzzle::combineLeftBlocks() {
                 mutex_left.lock();
 #ifdef USE_STRING_BLOCK
 #ifdef BREADTH_SEARCH
-                tempLeft.push_back( currentLeft+midBlocks[i] );
+                tempLeft.push_back( currentLeft+rightBlocks[i] );
 #else
-                leftBlocks.push_back( currentLeft+midBlocks[i] );
+                leftBlocks.push_back( currentLeft+rightBlocks[i] );
 #endif // ifdef BREADTH_SEARCH
 #else  // ifdef USE_STRING_BLOCK
                 std::vector<uint16_t> temp = currentLeft;

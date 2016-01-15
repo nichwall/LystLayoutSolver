@@ -1,18 +1,21 @@
 #include "lyst.h"
 
 int main(int argc, char **argv) {
-/*
+
     std::vector<int> pieces = {1000,1,4,2,5,2,2,1,4,4,2,1,9,6,5,0};
     int puzzleHeight = 3,
         puzzleWidth = 16;
-*/
-    std::vector<int> pieces = {1000,1,0,0,1,1,2,0,3,0,1,0,0,2,1,0};
+
+/*
+    std::vector<int> pieces = {0,1,0,0,1,1,2,0,3,0,1,0,0,2,1,0};
     int puzzleHeight = 3,
         puzzleWidth = 4;
-
-    for (int i=1; i<pieces.size(); i++) {
-        std::cout << (char)(96+i) << ": " << pieces[i] << "\n";
-    }
+*/
+/*
+    std::vector<int> pieces = {0,0,0,0,2,0,0,0,2,0,0,0,0,2,2,0};
+    int puzzleHeight = 2,
+        puzzleWidth = 4;
+*/
 
     Puzzle a (pieces, puzzleHeight, puzzleWidth);
     if (argc == 2) {

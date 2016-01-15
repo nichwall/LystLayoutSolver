@@ -291,7 +291,7 @@ void Puzzle::combineLeftBlocks() {
 #ifdef USE_STRING_BLOCK
         // Check if we should output information about runtime
         if ( currentLeft.size()/height <= verbosity_level ) {
-            printf("V-Level: %d\tLeft blocks: %u\tSize: %u\tRemoved: %u\n",verbosity_level,leftBlocks.size(),currentLeft.size(),totalRemoved);
+            printf("V-Level: %d\tLeft blocks: %lu\tSize: %lu\tRemoved: %d\n",verbosity_level,leftBlocks.size(),currentLeft.size(),totalRemoved);
         }
 #endif
 

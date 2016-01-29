@@ -13,8 +13,7 @@ configure_file (
     "${PROJECT_BINARY_DIR}/src/lystConfig.h"
 )
 
-# If we can avoid using C++14, do it. Travis doesn't like it yet
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -O3")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++0x -O3")
 
 # Adding extra libraries for displays and things
 set (EXTRA_LIBS ${EXTRA_LIBS} 

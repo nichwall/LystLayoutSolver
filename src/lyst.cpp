@@ -17,7 +17,6 @@ Puzzle::Puzzle(std::vector<int> pieceCountData, int puzzleHeight, int puzzleWidt
 }
 
 Puzzle::~Puzzle() {
-
 }
 
 // Helper functions used for generating things

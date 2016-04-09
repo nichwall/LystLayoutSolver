@@ -90,8 +90,8 @@ class Puzzle {
         inline bool pieceHasRight(int piece)  { return ( (piece & 0x8) != 0 ); }
 
         // Puzzle data
-        int height,
-            width;
+        unsigned int height,
+                     width;
         std::vector<int> maxPieceCounts;
         unsigned int max_threads;
         int verbosity_level;

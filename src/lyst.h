@@ -65,7 +65,7 @@ class Puzzle {
         void combineLeftBlocks();
 
         // Helper functions in generating
-        int getPiece(std::string block, int index);
+        int getPiece(std::string block, unsigned int index);
         std::vector<int> getPieceCounts(std::string puzzle);
         bool pieceCountIsValid(std::string puzzle);
         bool pieceCountIsValid(std::string puzzle, std::vector<int> count);
@@ -94,7 +94,7 @@ class Puzzle {
                      width;
         std::vector<int> maxPieceCounts;
         unsigned int max_threads;
-        int verbosity_level;
+        unsigned int verbosity_level;
         std::mutex mutex_left;
         std::mutex mutex_valid;
 

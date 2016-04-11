@@ -216,7 +216,7 @@ void Puzzle::generateFirstSet(std::string in) {
 void Puzzle::makeBlocks() {
     generateFirstSet();
 
-    printf("Block counts: %u\t%u\t%u\n",leftBlocks.size(),midBlocks.size(),rightBlocks.size());
+    printf("Block counts: %lu\t%lu\t%lu\n",leftBlocks.size(),midBlocks.size(),rightBlocks.size());
 
     printf("Max threads: %u\n",max_threads);
 
@@ -245,7 +245,7 @@ void Puzzle::makeBlocks() {
         } else {
             leftWidth = 0;
         }
-        printf("Left width: %d\tBlocks: %u\n",leftWidth,leftBlocks.size());
+        printf("Left width: %lu\tBlocks: %lu\n",leftWidth,leftBlocks.size());
         mutex_left.unlock();
     }
 #endif // ifdef BREADTH_SEARCH

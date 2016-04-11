@@ -6,7 +6,7 @@ int main(int argc, char **argv) {{
     std::vector<int> pieces = {1000,1,4,2,5,2,2,1,4,4,2,1,9,6,5,0};
     int puzzleHeight = 3,
 //        puzzleWidth = 16;
-        puzzleWidth = 7;
+        puzzleWidth = 4;
 
 /*
     std::vector<int> pieces = {0,1,0,0,1,1,2,0,3,0,1,0,0,2,1,0};
@@ -45,13 +45,13 @@ int main(int argc, char **argv) {{
     a.makeBlocks();
     
     printf("Back in main\n");
-    printf("Left: %ul\tMid: %ul\tRight: %ul\n",a.getLeftBlocks().size(), a.getMidBlocks().size(), a.getRightBlocks().size());
+    printf("Left: %lu\tMid: %lu\tRight: %lu\n",a.getLeftBlocks().size(), a.getMidBlocks().size(), a.getRightBlocks().size());
 
 #ifdef USE_STRING_BLOCK
     std::vector<std::string> valid = a.getValidBlocks();
-    printf("Found %d valid solutions.\n",valid.size());
+    printf("Found %lu valid solutions.\n",valid.size());
     std::ofstream solutions("solutions.txt");
-    for (int i=0; i<valid.size(); i++) {
+    for (unsigned int i=0; i<valid.size(); i++) {
         solutions << valid[i] << "\n";
     }
     solutions.close();

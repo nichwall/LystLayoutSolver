@@ -1,10 +1,12 @@
 #include "lyst.h"
+#include <fstream>
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv) {{
 
     std::vector<int> pieces = {1000,1,4,2,5,2,2,1,4,4,2,1,9,6,5,0};
     int puzzleHeight = 3,
-        puzzleWidth = 16;
+//        puzzleWidth = 16;
+        puzzleWidth = 7;
 
 /*
     std::vector<int> pieces = {0,1,0,0,1,1,2,0,3,0,1,0,0,2,1,0};
@@ -14,6 +16,11 @@ int main(int argc, char **argv) {
 /*
     std::vector<int> pieces = {0,0,0,0,2,0,0,0,2,0,0,0,0,2,2,0};
     int puzzleHeight = 2,
+        puzzleWidth = 4;
+*/
+/*
+    std::vector<int> pieces = {0,1,0,1,0,2,3,1,3,1,2,0,1,1,0,0};
+    int puzzleHeight = 4,
         puzzleWidth = 4;
 */
 
@@ -37,14 +44,17 @@ int main(int argc, char **argv) {
 
     a.makeBlocks();
     
-    printf("Left: %d\tMid: %d\tRight: %d\n",a.getLeftBlocks().size(), a.getMidBlocks().size(), a.getRightBlocks().size());
+    printf("Back in main\n");
+    printf("Left: %ul\tMid: %ul\tRight: %ul\n",a.getLeftBlocks().size(), a.getMidBlocks().size(), a.getRightBlocks().size());
 
 #ifdef USE_STRING_BLOCK
     std::vector<std::string> valid = a.getValidBlocks();
     printf("Found %d valid solutions.\n",valid.size());
+    std::ofstream solutions("solutions.txt");
     for (int i=0; i<valid.size(); i++) {
-        std::cout << valid[i] << "\n";
+        solutions << valid[i] << "\n";
     }
+    solutions.close();
     return 0;
 #else
 //    std::vector< std::vector<uint16_t> > left = a.getLeftBlocks();
@@ -53,4 +63,4 @@ int main(int argc, char **argv) {
 //    }
     return 0;
 #endif
-}
+}}

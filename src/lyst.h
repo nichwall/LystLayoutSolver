@@ -29,9 +29,11 @@ class Puzzle {
         inline int getPuzzleHeight() { return height;      }
         inline int getPuzzleWidth()  { return width;       }
         inline int getMaxThreads()   { return max_threads; }
+        inline bool isLoading()      { return loading;     }
 
         inline void setMaxThreads(int threadCount) { if (threadCount > 0) max_threads = threadCount; }
         inline void setVerbosity(int verbosity) { if (verbosity > 0) verbosity_level = verbosity; }
+        inline void setLoading(bool leading)    { this->loading = loading; }
         
         inline std::vector<int> getMaxPieceCount() { return maxPieceCounts; }
 #ifdef USE_STRING_BLOCK
@@ -55,7 +57,7 @@ class Puzzle {
 #endif
 
         // Block creations
-        void makeBlocks();
+        void makeBlocks(bool = false);
 
     private:
         // Functions related to block generation
@@ -97,6 +99,7 @@ class Puzzle {
         unsigned int verbosity_level;
         std::mutex mutex_left;
         std::mutex mutex_valid;
+        bool loading;
 
         // Vectors of blocks
 #ifdef USE_STRING_BLOCK
@@ -105,6 +108,10 @@ class Puzzle {
         std::vector< std::string > rightBlocks;
 
         std::vector< std::string > validSolutions;
+
+        void saveLeft(); // Saves left blocks in order to continue for next run
+        std::ofstream solutions;
+        void writeSolutions();
 #ifdef BREADTH_SEARCH
         std::vector< std::string > tempLeft;
         int leftWidth;

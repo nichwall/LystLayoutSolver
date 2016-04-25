@@ -6,6 +6,7 @@ Puzzle::Puzzle() {
     max_threads = std::thread::hardware_concurrency();
 
     verbosity_level = 5;
+    solutions.open("solutions.txt", std::ofstream::out | std::ofstream::app);
 }
 Puzzle::Puzzle(std::vector<int> pieceCountData, int puzzleHeight, int puzzleWidth) {
     maxPieceCounts = pieceCountData;
@@ -14,9 +15,17 @@ Puzzle::Puzzle(std::vector<int> pieceCountData, int puzzleHeight, int puzzleWidt
     max_threads = std::thread::hardware_concurrency();
 
     verbosity_level = 5;
+    solutions.open("solutions.txt", std::ofstream::out | std::ofstream::app);
 }
 
 Puzzle::~Puzzle() {
+    //printf("Saving left blocks to run state...\n");
+    //std::ofstream save ("progress.txt");
+    //for (unsigned int i=0; i<leftBlocks.size(); i++) {
+    //    save << leftBlocks[i] << "\n";
+    //}
+    //save.close();
+    //printf("done\n");
 }
 
 // Helper functions used for generating things
@@ -213,8 +222,22 @@ void Puzzle::generateFirstSet(std::string in) {
 }
 
 // Generate all of the blocks of desired width
-void Puzzle::makeBlocks() {
+void Puzzle::makeBlocks(bool loadFromFile) {
     generateFirstSet();
+#ifdef USE_STRING_BLOCK
+    if (loadFromFile) {
+        printf("Loading\n");
+        printf("Size of leftBlocks before load: %d\n",leftBlocks.size());
+        leftBlocks.clear();
+        std::ifstream save ("progress.txt");
+        std::string line;
+        while (std::getline(save,line)) {
+            leftBlocks.push_back(line);
+        }
+        save.close();
+        printf("Size of leftBlocks after load: %d\n",leftBlocks.size());
+    }
+#endif
 
     printf("Block counts: %lu\t%lu\t%lu\n",leftBlocks.size(),midBlocks.size(),rightBlocks.size());
 
@@ -277,7 +300,7 @@ void Puzzle::combineLeftBlocks() {
         if ( currentLeft.size()/height == width - 1 ) {
             useRight = true;
         } else if ( currentLeft.size()/height == width ) {
-        // If total removed elements is less than the thread count after mod, save the blocks
+            // If total removed elements is less than the thread count after mod, save the blocks
             mutex_valid.lock();
             validSolutions.push_back(currentLeft);
             mutex_valid.unlock();
@@ -288,6 +311,7 @@ void Puzzle::combineLeftBlocks() {
         // Check if we should output information about runtime
         if ( currentLeft.size()/height <= verbosity_level ) {
             printf("V-Level: %d\tLeft blocks: %lu\tSize: %lu\n",verbosity_level,leftBlocks.size(),currentLeft.size());
+            saveLeft();
         }
 #endif
 
@@ -298,10 +322,10 @@ void Puzzle::combineLeftBlocks() {
 #ifdef USE_STRING_BLOCK
                 if ( !checkAddition( currentLeft, currentLeft.length()/height, midBlocks[i], midBlocks[i].length()/height) )
 #else
-                if ( !checkAddition( currentLeft, currentLeft.size(), midBlocks[i], midBlocks[i].size()) )
+                    if ( !checkAddition( currentLeft, currentLeft.size(), midBlocks[i], midBlocks[i].size()) )
 #endif
-                    continue;
-                
+                        continue;
+
                 mutex_left.lock();
 #ifdef USE_STRING_BLOCK
 #ifdef BREADTH_SEARCH
@@ -328,9 +352,9 @@ void Puzzle::combineLeftBlocks() {
 #ifdef USE_STRING_BLOCK
                 if ( !checkAddition( currentLeft, currentLeft.length(), rightBlocks[i], rightBlocks[i].length()) )
 #else
-                if ( !checkAddition( currentLeft, currentLeft.size(), rightBlocks[i], rightBlocks[i].size()) )
+                    if ( !checkAddition( currentLeft, currentLeft.size(), rightBlocks[i], rightBlocks[i].size()) )
 #endif
-                    continue;
+                        continue;
 
                 mutex_left.lock();
 #ifdef USE_STRING_BLOCK
@@ -355,6 +379,16 @@ void Puzzle::combineLeftBlocks() {
         }
     }
 }
+
+#ifdef USE_STRING_BLOCK
+void Puzzle::saveLeft() {
+    std::ofstream save ("progress.txt");
+    for (unsigned int i=0; i<leftBlocks.size(); i++) {
+        save << leftBlocks[i] << "\n";
+    }
+    save.close();
+}
+#endif
 
 #ifndef USE_STRING_BLOCK
 uint16_t Puzzle::stou (std::string block) {

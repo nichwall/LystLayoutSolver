@@ -41,6 +41,15 @@ int main(int argc, char **argv) {{
         if (!strncmp(argv[i],"--LOAD",6) || !strncmp(argv[i],"-l",2)) {
             a.setLoading( true );
         }
+        // Help menu
+        if (!strncmp(argv[i],"--HELP",6) || !strncmp(argv[i],"-h",2)) {
+            printf("==============\n");
+            printf("Lyst help menu\n");
+            printf("==============\n");
+            printf(" ./Lyst [--THREADS] [--VERBOSITY] [-l|--LOAD]\n");
+            printf("  --THREADS=n      Run solver with n threads\n");
+            printf("  --VERBOSITY=n    Run solver with verbosity level n\n");
+        }
     }
     bool loading;
     printf("Finished commandline parse\n");

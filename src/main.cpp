@@ -26,9 +26,9 @@ int main(int argc, char **argv) {{
        */
 
     Puzzle a (pieces, puzzleHeight, puzzleWidth);
+    a.setLoading(false);
     // Command line arguments
     for (int i=0; i<argc; i++) {
-        printf("I: %d\t%s\n",i,argv[i]);
         // Thread count
         if (!strncmp(argv[i],"--THREADS=",10)) {
             a.setMaxThreads(atoi(argv[i]+10));
@@ -43,18 +43,17 @@ int main(int argc, char **argv) {{
         }
         // Help menu
         if (!strncmp(argv[i],"--HELP",6) || !strncmp(argv[i],"-h",2)) {
-            printf("==============\n");
-            printf("Lyst help menu\n");
-            printf("==============\n");
-            printf(" ./Lyst [--THREADS] [--VERBOSITY] [-l|--LOAD]\n");
+            printf("=================================\n");
+            printf("||       Lyst help menu        ||\n");
+            printf("=================================\n");
+            printf(" ./Lyst [-h] [--THREADS] [--VERBOSITY] [-l|--LOAD]\n");
+            printf("  --h              This help menu\n");
             printf("  --THREADS=n      Run solver with n threads\n");
             printf("  --VERBOSITY=n    Run solver with verbosity level n\n");
+            printf("  --LOAD | -l      Run solver, continuing from log file\n");
+            return 0;
         }
     }
-    bool loading;
-    printf("Finished commandline parse\n");
-
-    printf("Loading: *%d*\n",a.isLoading());
 
     printf("Using %d threads... use './Lyst [threads] [verbosity]' to change\n",a.getMaxThreads());
 
@@ -66,7 +65,7 @@ int main(int argc, char **argv) {{
 #ifdef USE_STRING_BLOCK
     std::vector<std::string> valid = a.getValidBlocks();
     printf("Found %lu valid solutions.\n",valid.size());
-    if (loading) {
+    if (a.isLoading()) {
         std::ofstream solutions("solutions.txt", std::ofstream::out | std::ofstream::app );
         for (unsigned int i=0; i<valid.size(); i++) {
             solutions << valid[i] << "\n";

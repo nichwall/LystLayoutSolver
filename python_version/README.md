@@ -27,7 +27,7 @@ Using an exponential fit on this table, it is expected to take about 259.5 weeks
 ## Using 2x3 blocks
 
 Based on the max count of each piece, there are 154 different combinations of 1x3 center blocks. Using these 1x3 blocks, 1771 different 2x3 blocks can be created. Experimenting with the expected run times for the 2x3 blocks.
-The maximum number of combinations for 1x3 blocks is 154^14^=4.2197*10^30^. When using 2x3 blocks, the maximum number of combinations is only 1771^7^=5.4642*10^22^. This increases the amount of RAM needed to hold the larger blocks, but should result in slightly faster runtime.
+The maximum number of combinations for 1x3 blocks is 154^14=4.2197e30. When using 2x3 blocks, the maximum number of combinations is only 1771^7=5.4642e22. This increases the amount of RAM needed to hold the larger blocks, but should result in faster runtime.
 The following table shows a comparison of the two block methods. For lower center widths the values should be about the same, but at higher center widths more blocks should be trimmed as the maximum number of pieces takes effect.
 
 | Center Width | 1x3 | 2x3 | Time (s) |

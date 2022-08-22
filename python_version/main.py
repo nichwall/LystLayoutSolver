@@ -6,6 +6,7 @@ from copy import deepcopy
 # Piece class
 class Piece:
     def __init__(self, value, identifier):
+        self.value = value
         # UP    : 0x01
         # DOWN  : 0x02
         # LEFT  : 0x04
@@ -36,6 +37,9 @@ class Block:
                 self.right += 2**i
 
         self.piece_counts = [0]*16
+        # Update piece counts by piece value
+        for p in pieces:
+            self.piece_counts[p.value] += 1
 
     def __repr__(self):
         out = ""
@@ -50,6 +54,7 @@ pieces = []
         # DOWN  : 0x02
         # LEFT  : 0x04
         # RIGHT : 0x08
+pieces.append(Piece(0, "."))
 pieces.append(Piece(1, "^"))
 pieces.append(Piece(2, "v"))
 pieces.append(Piece(3, "|"))
@@ -66,11 +71,13 @@ pieces.append(Piece(13,u'\u2534'))   #  0xC1 -> BOX DRAWINGS LIGHT UP AND HORIZO
 pieces.append(Piece(14,u'\u252c'))   #  0xC2 -> BOX DRAWINGS LIGHT DOWN AND HORIZONTAL
 pieces.append(Piece(15,u'\u253c'))   #  0xC5 -> BOX DRAWINGS LIGHT VERTICAL AND HORIZONTAL
 
-for i in range(len(pieces)):
-    print(pieces[i])
-
 HEIGHT = 3
 WIDTH  = 16
+MAX_COUNTS = [0,4,5,8,4,2,2,5,1,5,3,5,2,1,1,0] # How many of each piece there can be. Using old version from Dec 27, 2015?
+
+for i in range(len(pieces)):
+    print(f"{pieces[i].value}: {pieces[i]}    max count: {MAX_COUNTS[i]}")
+
 
 # Create each "block"
 blocks_of_combinations = [p for p in itertools.product(pieces, repeat=3)]
@@ -89,6 +96,11 @@ def block_is_valid(block):
     # Check middle pieces
     for idx in range(1,len(pieces)):
         if pieces[idx].up != pieces[idx-1].down:
+            return False
+
+    # Check if counts are less than maximum allowed
+    for i in range(len(pieces)):
+        if block.piece_counts[i] > MAX_COUNTS[i]:
             return False
     # Is valid
     return True
@@ -134,3 +146,14 @@ for i in right:
     right_str = horz_cat_string(right_str, str(i))
     right_str = horz_cat_string(right_str, "  \n  \n  ")
 print(right_str)
+
+print("\n\nCenter blocks")
+for j in range(4):
+    center_str = "\n\n"
+    for i in center[j*30:(j+1)*30]:
+        center_str = horz_cat_string(center_str, str(i))
+        center_str = horz_cat_string(center_str, "  \n  \n  ")
+    print(center_str)
+    print()
+
+

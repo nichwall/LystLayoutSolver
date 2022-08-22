@@ -47,6 +47,33 @@ def combine_center(current_block):
             #passed_block.add_block(next_block) 
             #combine_center( passed_block )
 
+# Create each possible block combination of size Nx3
+larger_blocks = []
+def create_larger_blocks(current_block, width=1):
+    global valid_found
+    global larger_blocks
+    # Recursive iterate to find all valid blocks
+    if current_block.width == width:
+        valid_found += 1
+        larger_blocks.append(current_block)
+        return
+
+    # Iterate over all of the center blocks
+    for next_block in center_blocks:
+        # Check if next_block can be combined with current_block
+        if can_combine_blocks(current_block, next_block):
+            create_larger_blocks( Block( current_block.pieces + next_block.pieces ), width )
+
+# Make larger blocks
 for first_block in center_blocks:
+    create_larger_blocks(first_block, width=2)
+
+print(f" Length of larger_blocks: {len(larger_blocks)}")
+
+valid_found = 0
+#for first_block in center_blocks:
+for first_block in larger_blocks:
     combine_center(first_block)
+
 print(f"Found {valid_found} solutions of width {WIDTH-2} center blocks")
+

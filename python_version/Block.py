@@ -89,6 +89,8 @@ def create_vertical_blocks(pieces):
             center.append(block)
     return [left, center, right]
 
+
+
 def print_blocks(block_array, count_per_row=30):
     for j in range( int(len(block_array)/count_per_row)+1 ):
         block_str = "\n\n"

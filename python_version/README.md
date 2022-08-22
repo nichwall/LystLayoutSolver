@@ -23,3 +23,16 @@ Initial Python version shows it definitely works, but will take a while to run.
 | 7 | 36927895 | 795.565 |
 
 Using an exponential fit on this table, it is expected to take about 259.5 weeks to find all of the 14 wide combinations of center pieces.
+
+## Using 2x3 blocks
+
+Based on the max count of each piece, there are 154 different combinations of 1x3 center blocks. Using these 1x3 blocks, 1771 different 2x3 blocks can be created. Experimenting with the expected run times for the 2x3 blocks.
+The maximum number of combinations for 1x3 blocks is 154^14^=4.2197*10^30^. When using 2x3 blocks, the maximum number of combinations is only 1771^7^=5.4642*10^22^. This increases the amount of RAM needed to hold the larger blocks, but should result in slightly faster runtime.
+The following table shows a comparison of the two block methods. For lower center widths the values should be about the same, but at higher center widths more blocks should be trimmed as the maximum number of pieces takes effect.
+
+| Center Width | 1x3 | 2x3 | Time (s) |
+| ----------- | ----------- | ----------- | ----------- |
+| 2 | 0.061 | 0.064 | 0.061 |
+| 4 | 2.327 | 2.258 | 2.327 |
+| 6 | 141.309 | 136.207 | 141.309 |
+| 8 |  |  | 795.565 |

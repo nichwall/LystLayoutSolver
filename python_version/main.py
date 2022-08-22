@@ -43,8 +43,10 @@ def combine_center(current_block):
         # Check if next_block can be combined with current_block
         if can_combine_blocks(current_block, next_block):
             combine_center( Block( current_block.pieces + next_block.pieces ) )
+            #passed_block = deepcopy(current_block)
+            #passed_block.add_block(next_block) 
+            #combine_center( passed_block )
 
 for first_block in center_blocks:
     combine_center(first_block)
-combine_center(center_blocks[0])
 print(f"Found {valid_found} solutions of width {WIDTH-2} center blocks")

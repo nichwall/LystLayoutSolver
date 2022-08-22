@@ -32,6 +32,16 @@ class Block:
             out += "\n"
         return out
 
+    def add_block(self, right_block):
+        # DONT USE. Found to be slower than
+        # just creating a new block
+        for p in right_block.pieces:
+            self.piece_counts[p.value] += 1
+
+        self.pieces += right_block.pieces
+        self.right = right_block.right
+        self.width += right_block.width
+
 def vertical_block_is_valid(block):
     pieces = block.pieces
     # Iterate over each piece to see if valid. Assumes a single column
@@ -111,8 +121,3 @@ def can_combine_blocks(left_block, right_block):
             return False
 
     return True
-
-# TODO speed up block combination to prevent
-# recalculation of multiple values
-def combine_blocks(left_block, right_block):
-    pass

@@ -10,3 +10,5 @@ cmake_install.cmake
 *.o
 Lyst
 src/lystConfig.h
+
+__pycache__/

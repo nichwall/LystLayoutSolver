@@ -26,11 +26,13 @@ class Block:
 
     def __repr__(self):
         out = ""
-        for i in self.pieces:
-            out += str(i) + "\n"
+        for j in range(HEIGHT):
+            for i in range(j, len(self.pieces), HEIGHT):
+                out += str(self.pieces[i])
+            out += "\n"
         return out
 
-def block_is_valid(block):
+def vertical_block_is_valid(block):
     pieces = block.pieces
     # Iterate over each piece to see if valid. Assumes a single column
     # First element is top, last element is bottom.
@@ -63,7 +65,7 @@ def create_vertical_blocks(pieces):
         # Convert piece array to block
         block = Block(piece_arr)
 
-        if not block_is_valid(block):
+        if not vertical_block_is_valid(block):
             continue
 
         # Check if left block
@@ -77,7 +79,6 @@ def create_vertical_blocks(pieces):
             center.append(block)
     return [left, center, right]
 
-
 def print_blocks(block_array, count_per_row=30):
     for j in range( int(len(block_array)/count_per_row)+1 ):
         block_str = "\n\n"
@@ -86,3 +87,32 @@ def print_blocks(block_array, count_per_row=30):
             block_str = horz_cat_string(block_str, "  \n  \n  ")
         print(block_str)
         print()
+
+def print_stats(left, center, right):
+    print(f"  Left blocks: {len(left)}")
+    print(f" Right blocks: {len(right)}")
+    print(f"Center blocks: {len(center)}")
+    print("\nLeft blocks")
+    print_blocks(left)
+    print("\nRight blocks")
+    print_blocks(right)
+    print("\nCenter blocks")
+    print_blocks(center)
+
+# Combine two blocks together
+def can_combine_blocks(left_block, right_block):
+    # Check if sides match up
+    if left_block.right != right_block.left:
+        return False
+
+    # Check if counts are too big
+    for idx in range(len(MAX_COUNTS)):
+        if left_block.piece_counts[idx] + right_block.piece_counts[idx] > MAX_COUNTS[idx]:
+            return False
+
+    return True
+
+# TODO speed up block combination to prevent
+# recalculation of multiple values
+def combine_blocks(left_block, right_block):
+    pass

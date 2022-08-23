@@ -30,9 +30,9 @@ Based on the max count of each piece, there are 154 different combinations of 1x
 The maximum number of combinations for 1x3 blocks is 154^14=4.2197e30. When using 2x3 blocks, the maximum number of combinations is only 1771^7=5.4642e22. This increases the amount of RAM needed to hold the larger blocks, but should result in faster runtime.
 The following table shows a comparison of the two block methods. For lower center widths the values should be about the same, but at higher center widths more blocks should be trimmed as the maximum number of pieces takes effect.
 
-| Center Width | 1x3 | 2x3 | Time (s) |
-| ----------- | ----------- | ----------- | ----------- |
-| 2 | 0.061 | 0.064 | 0.061 |
-| 4 | 2.327 | 2.258 | 2.327 |
-| 6 | 141.309 | 136.207 | 141.309 |
-| 8 |  |  | 795.565 |
+| Center Width | Time (s) - 1x3 | Time (s) - 2x3 |
+| ----------- | ----------- | ----------- |
+| 2 | 0.061 | 0.064 |
+| 4 | 2.327 | 2.258 |
+| 6 | 141.309 | 136.207 |
+| 8 | 3579.102 | 3616.306 |

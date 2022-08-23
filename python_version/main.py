@@ -65,14 +65,14 @@ def create_larger_blocks(current_block, width=1):
             create_larger_blocks( Block( current_block.pieces + next_block.pieces ), width )
 
 # Make larger blocks
-for first_block in center_blocks:
-    create_larger_blocks(first_block, width=2)
+#for first_block in center_blocks:
+    #create_larger_blocks(first_block, width=2)
 
 print(f" Length of larger_blocks: {len(larger_blocks)}")
 
 valid_found = 0
-#for first_block in center_blocks:
-for first_block in larger_blocks:
+for first_block in center_blocks:
+#for first_block in larger_blocks:
     combine_center(first_block)
 
 print(f"Found {valid_found} solutions of width {WIDTH-2} center blocks")
